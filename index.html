@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link href="css/style.css" rel="stylesheet">
+    </head>
+<body>
+    <div class="visuals"></div>
+    <svg class="svg--overall" width="960" height="100"></svg>
+    <div>
+        Brush state: <input class="label_brush_start" type="text" name="brush_start">
+        Brush end: <input class="label_brush_end" type="text" name="brush_end">
+    </div>
+    <div>
+        Current View:
+        <select id="selectBrushView">
+            <option value="0">View 0</option>
+        </select>
+    </div>
+    <div>
+        <button id="add-new-view"/>Add</button>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
