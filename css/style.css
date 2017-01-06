@@ -11,3 +11,10 @@
 .visual.active {
     border-color: yellow;
 }
+
+.spaced-top {
+    margin-top: 1.5rem;
+}
+.p-padded-top {
+    padding-top: 0.75rem;
+}

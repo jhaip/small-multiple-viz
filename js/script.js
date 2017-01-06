@@ -13,7 +13,7 @@ var data = [
 ];
 
 class BaseVisualizer {
-    constructor(source, data, parent_el, svg_width, svg_height) {
+    constructor(source, data, parent_el, svg_width, svg_height, options) {
         this.source = source;  // string of the source in the global data source
         this.data = data;  // pre filtered by a single source
         this.margin = {top: 20, right: 20, bottom: 20, left: 40};
@@ -24,6 +24,7 @@ class BaseVisualizer {
         this.height = this.svg_height - this.margin.top - this.margin.bottom;
         this.create_el();
         this.x = d3.scaleTime().range([0, this.width]);
+        this.options = options;
     }
     create_el() {
         this.svg = this.parent_el.append("div").append("svg")
@@ -42,18 +43,27 @@ class BaseVisualizer {
         this.x.domain(s.map(x2.invert, x2));
         this.update_graph_after_brushing();
     }
+    static propertyDefinition() {
+        return [];
+    }
 }
 
 class LineGraphVisualizer extends BaseVisualizer {
-    constructor(source, data, parent_el, svg_width, svg_height, curve_type) {
-        super(source, data, parent_el, svg_width, svg_height);
+    constructor(source, data, parent_el, svg_width, svg_height, options) {
+        super(source, data, parent_el, svg_width, svg_height, options);
 
+        this.visualType = "line_graph";
         this.y = d3.scaleLinear().range([this.height, 0]).domain([0, d3.max(this.data, function(d) { return d.price; })]);
         this.xAxis = d3.axisBottom(this.x);
         this.yAxis = d3.axisLeft(this.y);
 
-        if (curve_type === undefined) {
-            curve_type = d3.curveLinear;
+        var curve_type = d3.curveLinear;
+        if ("curveType" in options) {
+            if (options.curveType === "monotoneX") {
+                curve_type = d3.curveMonotoneX;
+            } else if (options.curveType === "stopAfter") {
+                curve_type = d3.curveStepAfter;
+            }
         }
 
         var that = this;
@@ -92,12 +102,22 @@ class LineGraphVisualizer extends BaseVisualizer {
         this.el.select(".area").attr("d", this.area);
         this.el.select(".axis--x").call(this.xAxis);
     }
+    static propertyDefinition() {
+        return [
+            {
+                "name": "curveType",
+                "type": "options",
+                "options": ["monotoneX", "stopAfter"]
+            }
+        ];
+    }
 }
 
 class LogVisualizer extends BaseVisualizer {
-    constructor(source, data, parent_el, svg_width, svg_height) {
-        super(source, data, parent_el, svg_width, svg_height);
+    constructor(source, data, parent_el, svg_width, svg_height, options) {
+        super(source, data, parent_el, svg_width, svg_height, options);
         this.data_in_brush = this.data;
+        this.visualType = "log";
     }
     create_el() {
         this.el = this.parent_el.append("div")
@@ -129,6 +149,11 @@ class LogVisualizer extends BaseVisualizer {
         this.el.html("");
         this.visualize();
     }
+}
+
+var visualTypeMap = {
+    "line_graph": LineGraphVisualizer,
+    "log": LogVisualizer
 }
 
 var svg = d3.select("svg.svg--overall"),
@@ -177,22 +202,27 @@ function get_filtered_data_by_source(source) {
     return a;
 }
 
+var brushViews = [];
+
 function create_brushView_visuals(brushView_el) {
-    return [new LineGraphVisualizer("A0", get_filtered_data_by_source("A0"), brushView_el, 400, 200, d3.curveMonotoneX),
-            new LineGraphVisualizer("D1", get_filtered_data_by_source("D1"), brushView_el, 400, 100, d3.curveStepAfter),
-            new LogVisualizer("D1", get_filtered_data_by_source("D1"), brushView_el, 400, 100)];
+    if (brushViews.length > 0) {
+        var s = [];
+        brushViews[0].visuals.forEach(function(v) {
+            s.push(new visualTypeMap[v.visualType](v.source, get_filtered_data_by_source(v.source), brushView_el, v.svg_width, v.svg_height, v.options))
+        });
+        return s;
+    } else {
+        return [new LineGraphVisualizer("A0", get_filtered_data_by_source("A0"), brushView_el, 400, 200, {"curve_type": d3.curveMonotoneX})];
+    }
 }
 
-var brushViews = [{
+brushViews = [{
     start_time: x2.domain()[0],
     end_time: x2.domain()[1],
     el: d3.select(".visuals").append("div").attr("class", "visual active"),
     visuals: create_brushView_visuals(d3.select(".visual"))
 }];
 var activeBrushView = 0;
-  // var visualizers = [new LineGraphVisualizer("A0", get_filtered_data_by_source("A0"), d3.select(".visuals"), 960, 200, d3.curveMonotoneX),
-  //                    new LineGraphVisualizer("D1", get_filtered_data_by_source("D1"), d3.select(".visuals"), 960, 100, d3.curveStepAfter),
-  //                    new LogVisualizer("D1", get_filtered_data_by_source("D1"), d3.select(".visuals"), 960, 100)];
 
   brushViews[activeBrushView].visuals.forEach(function(v) {
       v.visualize();
@@ -315,3 +345,49 @@ function type(d) {
   d.price = +d.price;
   return d;
 }
+
+function selectEditVisualType(visualType) {
+    $(".visual-types__extra-options").empty();
+    visualTypeMap[visualType].propertyDefinition().forEach(function(d) {
+        var e = undefined;
+        if (d.type === "options") {
+            e = $("<select class=\"visual-types__extra-option\"></select>").data("name", d.name);
+            d.options.forEach(function(o) {
+                e.append(`<option value="${o}">${o}</option>`);
+            });
+        } else if (d.type === "number") {
+            e = $("<input class=\"visual-types__extra-option\" type=\"text\" value=\"400\">").data("name", d.name);
+        }
+        $(".visual-types__extra-options").append($("<div></div>")).append(e);
+    });
+}
+function addNewVisualType() {
+    var visualType = $("#visual-types").val();
+    var visualTypeClass = visualTypeMap[visualType];
+    brushViews.forEach(function(bv) {
+        var signal = $(".visual-types__source").val();
+        var filtered_data_by_source = get_filtered_data_by_source(signal);
+        var brushView_el = bv.visuals[0].parent_el;
+        var width = eval($(".visual-types__width").val());
+        var height = eval($(".visual-types__height").val());
+        var options = {};
+        $(".visual-types__extra-option").each(function() {
+            var extraPropertyName = $(this).data("name");
+            var extraPropertyVal = $(this).val();
+            options[extraPropertyName] = extraPropertyVal;
+        });
+        bv.visuals.push(new visualTypeClass(signal, filtered_data_by_source, brushView_el, width, height, options))
+        brush.move(d3.select(".brush"), x2.range());
+        bv.visuals[bv.visuals.length-1].visualize();
+    });
+}
+
+$("#visual-types").change(function() {
+    var option_value = $(this).val();
+    selectEditVisualType(option_value);
+});
+selectEditVisualType("line_graph");
+
+$(".visual-types__add-visual").click(function() {
+    addNewVisualType();
+});

@@ -20,6 +20,32 @@
     <div>
         <button id="add-new-view"/>Add</button>
     </div>
+
+    <div class="spaced-top">
+        <h3>Edit Visuals</h3>
+        <select id="visual-types">
+            <option value="line_graph">Line Graph</option>
+            <option value="log">Text Log</option>
+        </select>
+        <div class="visual-types__options p-padded-top">
+            <div>
+                Soure: <select class="visual-types__source">
+                    <option value="A0">A0</option>
+                    <option value="D1">D1</option>
+                </select>
+            </div>
+            <div>
+                Width: <input class="visual-types__width" type="text" value="400">
+            </div>
+            <div>
+                Height: <input class="visual-types__height" type="text" value="100">
+            </div>
+        </div>
+        <div class="visual-types__extra-options"></div>
+        <div class="p-padded-top">
+            <button class="visual-types__add-visual">Add Visual</button>
+        </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="js/script.js"></script>
