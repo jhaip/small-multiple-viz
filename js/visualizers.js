@@ -13,6 +13,8 @@ class BaseVisualizer {
         this.options = options;
     }
     create_el() {
+        this.parent_el.append("h4").text("Source: "+this.source);
+
         this.svg = this.parent_el.append("div").append("svg")
             .attr("width", this.svg_width)
             .attr("height", this.svg_height);
@@ -63,9 +65,15 @@ class LineGraphVisualizer extends BaseVisualizer {
     visualize() {
         var that = this;
 
+        /// random id from http://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+        var clipId = (Math.random().toString(36)+'00000000000000000').slice(2, 5+2);
+        while (!d3.select("#clip--"+clipId).empty()) {
+            clipId = (Math.random().toString(36)+'00000000000000000').slice(2, 5+2);
+        }
+
         // clip the bounds of the area mark to the graph width and height
         this.el.append("defs").append("clipPath")
-            .attr("id", "clip--" + this.source)
+            .attr("id", "clip--" + clipId)
           .append("rect")
             .attr("width", this.width)
             .attr("height", this.height);
@@ -74,7 +82,7 @@ class LineGraphVisualizer extends BaseVisualizer {
             .datum(that.data)
             .attr("class", "area")
             .attr("d", that.area)
-            .attr("clip-path", "url(#clip--" + this.source + ")");
+            .attr("clip-path", "url(#clip--" + clipId + ")");
 
         this.el.append("g")
             .attr("class", "axis axis--x")
@@ -108,6 +116,7 @@ class LogVisualizer extends BaseVisualizer {
         this.visualType = "log";
     }
     create_el() {
+        this.parent_el.append("h4").text("Source: "+this.source);
         this.el = this.parent_el.append("div")
             .attr("class", "focus")
             .style("width", this.svg_width+"px")
