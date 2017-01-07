@@ -18,3 +18,8 @@
 .p-padded-top {
     padding-top: 0.75rem;
 }
+
+.visual-title {
+    font-size: 10px;
+    color: blue;
+}
