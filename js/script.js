@@ -11,6 +11,7 @@ var data = [
     {"source": "D1", "date": "2017-01-02T14:15:11.471Z", "price": 1},
     {"source": "D1", "date": "2017-01-02T14:16:11.471Z", "price": 0}
 ];
+var last_day = 3;
 
 var visualTypeMap = {
     "line_graph": LineGraphVisualizer,
@@ -39,8 +40,7 @@ var context = svg.append("g")
     .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
 data.forEach(function(d) {
-    d.date = parseDate(d.date);
-    d.price = +d.price;
+    d = type(d);
 })
 
 x2.domain(d3.extent(data, function(d) { return d.date; }));
@@ -72,13 +72,25 @@ function create_brushView_visuals(brushView_el) {
     }
 }
 
-context.selectAll(".strip")
+// context.selectAll(".strip")
+//     .data(data)
+//     .enter().append("rect")
+//         .attr("class", "strip")
+//         .attr("x", function(d) { return x2(d.date)-1; })
+//         .attr("width", 3)
+//         .attr("opacity", 0.7)
+//         .attr("y", function(d) { return y2(d.source); })
+//         .attr("height", y2.bandwidth());
+
+var strip = context.selectAll(".strip")
     .data(data)
-    .enter().append("rect")
+
+strip.enter().append("rect")
         .attr("class", "strip")
-        .attr("x", function(d) { return x2(d.date)-1; })
         .attr("width", 3)
         .attr("opacity", 0.7)
+    .merge(strip)
+        .attr("x", function(d) { return x2(d.date)-1; })
         .attr("y", function(d) { return y2(d.source); })
         .attr("height", y2.bandwidth());
 
@@ -167,6 +179,39 @@ d3.select(".label_brush_end").on("change", function(d, i) {
 
 d3.select("#add-new-view").on("click", function() {
     addNewView();
+});
+
+d3.select("#add-new-data").on("click", function() {
+    last_day += 1;
+    var date = d3.isoFormat(new Date(2017, 0, last_day)),
+        price = Math.random()*10;
+    data.push(type({"source": "A0", "date": date, "price": price}));
+
+    x2.domain(d3.extent(data, function(d) { return d.date; }));
+    y2.domain(d3.extent(data, function(d) { return d.source; }));
+
+    xAxis2 = d3.axisBottom(x2);
+    yAxis2 = d3.axisLeft(y2);
+
+    strip = context.selectAll(".strip")
+        .data(data);
+
+    strip.enter().append("rect")
+            .attr("class", "strip")
+            .attr("width", 3)
+            .attr("opacity", 0.7)
+        .merge(strip)
+            .attr("x", function(d) { return x2(d.date)-1; })
+            .attr("y", function(d) { return y2(d.source); })
+            .attr("height", y2.bandwidth());
+
+    context.select("g.axis.axis--x").call(xAxis2);
+
+    context.select("g.axis.axis--y").call(yAxis2);
+
+    context.select("g.brush")
+        .call(brush)
+        .call(brush.move, x2.range());
 });
 
 d3.select("#selectBrushView").on("change", function() {
