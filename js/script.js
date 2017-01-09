@@ -208,7 +208,7 @@ function selectEditVisualType(visualType) {
 function addNewVisualType() {
     var visualType = $("#visual-types").val();
     var visualTypeClass = visualTypeMap[visualType];
-    brushViews.forEach(function(bv) {
+    brushViews.forEach(function(bv, i) {
         var signal = $(".visual-types__source").val();
         var filtered_data_by_source = get_filtered_data_by_source(signal);
         var brushView_el = bv.visuals[0].parent_el;
@@ -221,7 +221,12 @@ function addNewVisualType() {
             options[extraPropertyName] = extraPropertyVal;
         });
         bv.visuals.push(new visualTypeClass(signal, filtered_data_by_source, brushView_el, width, height, options))
-        brush.move(d3.select(".brush"), x2.range());
+        if (bv.visuals.length > 1) {
+            bv.visuals[bv.visuals.length-1].update_brushing_with_domain(bv.visuals[0].x.domain());
+        } else {
+            // TODO: handle the case where addNewVisualType was used to add the 1st visual to a brush view
+            console.log("TODO");
+        }
         bv.visuals[bv.visuals.length-1].visualize();
     });
 }

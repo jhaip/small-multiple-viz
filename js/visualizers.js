@@ -31,6 +31,10 @@ class BaseVisualizer {
         this.x.domain(s.map(x2.invert, x2));
         this.update_graph_after_brushing();
     }
+    update_brushing_with_domain(domain) {
+        this.x.domain(domain);
+        this.update_graph_after_brushing();
+    }
     static propertyDefinition() {
         return [];
     }
