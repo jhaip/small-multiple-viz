@@ -27,6 +27,8 @@ class BaseVisualizer {
     }
     update_graph_after_brushing() {
     }
+    update_data(newData) {
+    }
     update_brushing(s, x2) {
         this.x.domain(s.map(x2.invert, x2));
         this.update_graph_after_brushing();
@@ -97,6 +99,20 @@ class LineGraphVisualizer extends BaseVisualizer {
             .attr("class", "axis axis--y")
             .call(that.yAxis);
     }
+    update_data(newData) {
+        this.data = newData;
+        this.y = d3.scaleLinear().range([this.height, 0]).domain([0, d3.max(this.data, function(d) { return d.price; })]);
+        this.yAxis = d3.axisLeft(this.y);  // might not be needed
+
+        var that = this;
+        this.area.x(function(d) { return that.x(d.date); })
+            .y0(that.height)
+            .y1(function(d) { return that.y(d.price); });
+
+        // // TODO: use D3 data update binding instead of replacing the entire visual
+        this.el.html("");
+        this.visualize();
+    }
     update_graph_after_brushing() {
         this.el.select(".area").attr("d", this.area);
         this.el.select(".axis--x").call(this.xAxis);
@@ -136,6 +152,10 @@ class LogVisualizer extends BaseVisualizer {
             .text(function(d) {
                 return "(" + d3.utcFormat(d.date) + ") " + that.source + " = " + d.price;
             });
+    }
+    update_data(newData) {
+        this.data = newData;
+        this.update_graph_after_brushing();
     }
     update_graph_after_brushing() {
         var that = this;

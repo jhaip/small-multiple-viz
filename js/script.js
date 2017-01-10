@@ -182,10 +182,28 @@ d3.select("#add-new-view").on("click", function() {
 });
 
 d3.select("#add-new-data").on("click", function() {
+    var beforeDomainEnd = new Date(x2.domain()[1]);
+    var shouldExtendBrush = false;
+    var beforeBrushDomain = d3.brushSelection(d3.select(".brush").node()).map(x2.invert, x2);
+
     last_day += 1;
     var date = d3.isoFormat(new Date(2017, 0, last_day)),
         price = Math.random()*10;
     data.push(type({"source": "A0", "date": date, "price": price}));
+
+    brushViews.forEach(function(bv, i) {
+        bv.visuals.forEach(function(v) {
+            if (v.x.domain()[1] >= beforeDomainEnd) {
+                if (i == activeBrushView) {
+                    shouldExtendBrush = true;
+                    console.log("setting shouldExtendBrush to True");
+                }
+                v.update_data(get_filtered_data_by_source(v.source));
+            } else {
+                console.log("Skipping visual before its brushing wasn't at the end");
+            }
+        });
+    });
 
     x2.domain(d3.extent(data, function(d) { return d.date; }));
     y2.domain(d3.extent(data, function(d) { return d.source; }));
@@ -209,9 +227,17 @@ d3.select("#add-new-data").on("click", function() {
 
     context.select("g.axis.axis--y").call(yAxis2);
 
-    context.select("g.brush")
-        .call(brush)
-        .call(brush.move, x2.range());
+    if (shouldExtendBrush) {
+        console.log("extending brush");
+        context.select("g.brush")
+            .call(brush)
+            .call(brush.move, x2.range());
+    } else {
+        console.log("keeping old brush");
+        context.select("g.brush")
+            .call(brush)
+            .call(brush.move, beforeBrushDomain.map(x2, x2.invert));
+    }
 });
 
 d3.select("#selectBrushView").on("change", function() {
