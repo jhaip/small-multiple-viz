@@ -29,11 +29,18 @@ function onConnectionLost(responseObject) {
 }
 
 function onMessageArrived(message) {
-    console.log("onMessageArrived:"+message.payloadString);
     try {
         msg = JSON.parse(message.payloadString);
-        console.log(msg);
-        addNewDataPoint(msg.source, msg.price);
+        if (msg.type == "BINARY" && !isNaN(msg.value)) {
+            var v = parseInt(msg.value);
+            var msg_tick = parseInt(msg.tick);
+            if (!isNaN(v)) {
+                addNewDataPoint(msg.label, v);
+            }
+        } else {
+            console.log("Unused input:");
+            console.log(msg);
+        }
     } catch (e) {
         console.log("error");
         console.log(e);
