@@ -15,7 +15,8 @@ var last_day = 3;
 
 var visualTypeMap = {
     "line_graph": LineGraphVisualizer,
-    "log": LogVisualizer
+    "log": LogVisualizer,
+    "video-timeline": VideoTimelineVisualizer
 }
 
 var svg = d3.select("svg.svg--overall"),

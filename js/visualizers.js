@@ -171,3 +171,74 @@ class LogVisualizer extends BaseVisualizer {
         this.visualize();
     }
 }
+
+class VideoTimelineVisualizer extends BaseVisualizer {
+    constructor(source, data, parent_el, svg_width, svg_height, options) {
+        super(source, data, parent_el, svg_width, svg_height, options);
+        this.data_in_brush = this.data;
+        this.visualType = "video-timeline";
+        this.frameWidth = 133;
+        this.frameHeight = 100;
+    }
+    create_el() {
+        this.parent_el.append("h4").text("Source: "+this.source);
+        this.el = this.parent_el.append("div")
+            .attr("class", "focus")
+            .style("width", this.svg_width+"px")
+            .style("height", this.svg_height+"px")
+            .style("overflow-y", "scroll");
+    }
+    visualize() {
+        this.fetchFrames(this.x.domain()[0], this.x.domain()[1]).done(function(data) {
+            $.each(chooseFrames(data), function(i, r) {
+                this.el.append('<img src="http://192.168.2.13:5000/clips/'+r+'" width="133" height="100">');
+            });
+        }).fail(function() {
+            console.err("Error fetching video frames");
+        });
+    }
+    chooseFrames(frames) {
+        ideal_n_frames = Math.floor(this.width / this.frameWidth);
+        if (frames.length > ideal_n_frames) {
+            var offset = Math.floor(frames.length / ideal_n_frames);
+            var r = [];
+            for (var i=0; i<frames.length, i+=offset) {
+                r.push(frames[i]);
+            }
+            return r;
+        }
+        return frames;
+    }
+    fetchFrames(start_time, stop_time) {
+        var defer = $.Deferred()
+        var formatTime = d3.timeFormat("%Y-%m-%dT%H-%M-%SZ");
+        start_time = formatTime(start_time);
+        stop_time = formatTime(stop_time);
+        var url = "http://192.168.2.13:5000/data?start=" + start_time + "&stop=" + stop_time;
+
+        $.get(url).done(function(data) {
+            console.log(data.results);
+            defer.resolve(data.results);
+        }).fail(function() {
+            defer.fail();
+        });
+        return defer;
+    }
+    update_data(newData) {
+        this.data = newData;
+        this.update_graph_after_brushing();
+    }
+    update_graph_after_brushing() {
+        var that = this;
+        this.data_in_brush = [];
+        this.data.forEach(function(d) {
+            if (d.date >= that.x.domain()[0] && d.date <= that.x.domain()[1]) {
+                that.data_in_brush.push(d);
+            }
+        })
+
+        // TODO: use D3 data update binding instead of replacing the entire visual
+        this.el.html("");
+        this.visualize();
+    }
+}
