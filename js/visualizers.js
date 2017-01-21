@@ -174,6 +174,7 @@ class LogVisualizer extends BaseVisualizer {
 
 class VideoTimelineVisualizer extends BaseVisualizer {
     constructor(source, data, parent_el, svg_width, svg_height, options) {
+        svg_height = 140; // overrride for now
         super(source, data, parent_el, svg_width, svg_height, options);
         this.data_in_brush = this.data;
         this.visualType = "video-timeline";
@@ -193,37 +194,57 @@ class VideoTimelineVisualizer extends BaseVisualizer {
     visualize() {
         var that = this;
         this.fetchFrames(this.x.domain()[0], this.x.domain()[1]).done(function(data) {
-            $.each(that.chooseFrames(data), function(i, r) {
-                // that.el.append("img")
-                //     .attr("width", that.frameWidth, that.frameHeight)
-                //     .attr("src", "http://192.168.2.13:5000/clips/"+r);
-                that.el.selectAll('.video-frame')
-                    .data(data)
-                    .enter().append("image")
-                    .attr("class", "video-frame")
-                    .attr("width", that.frameWidth)
-                    .attr("height", that.frameHeight)
-                    .attr("xlink:href", function(d) {
-                        return "http://192.168.2.13:5000/clips/"+d;
-                    })
-                    .attr("x", function(d) {
-                        var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
-                        var dat = parseTime(d.substring(5,25));
-                        return that.x(dat);
-                    });
+            // $.each(that.chooseFrames(data), function(i, r) {
+            //     that.el.append("img")
+            //         .attr("width", that.frameWidth, that.frameHeight)
+            //         .attr("src", "http://192.168.2.13:5000/clips/"+r);
+            // });
+            that.data_in_brush = data;
 
-                that.el.selectAll('.video-frame-tick')
-                    .data(data)
-                    .enter().append("rect")
-                    .attr("class", "video-frame-tick")
-                    .attr("width", 3)
-                    .attr("height", 10)
-                    .attr("fill", "blue")
-                    .attr("x", function(d) {
-                        var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
-                        var dat = parseTime(d.substring(5,25));
-                        return that.x(dat);
-                    });
+            that.el.selectAll('.video-frame')
+                .data(data)
+                .enter().append("image")
+                .attr("class", "video-frame")
+                .attr("width", that.frameWidth)
+                .attr("height", that.frameHeight)
+                .attr("xlink:href", function(d) {
+                    return "http://192.168.2.13:5000/clips/"+d;
+                })
+                .attr("data-time", function(d) {
+                    var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
+                    var dat = parseTime(d.substring(5,25));
+                    return dat.getTime();
+                })
+                .attr("x", function(d) {
+                    var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
+                    var dat = parseTime(d.substring(5,25));
+                    return that.x(dat);
+                });
+
+            that.el.selectAll('.video-frame-tick')
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "video-frame-tick")
+                .attr("width", 1)
+                .attr("opacity", 0.1)
+                .attr("height", that.height)
+                .attr("fill", "black")
+                .attr("x", function(d) {
+                    var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
+                    var dat = parseTime(d.substring(5,25));
+                    return that.x(dat);
+                });
+
+            that.parent_el.select("button").remove();
+            that.parent_el.append("button").text("PLAY").on("click", function() {
+                that.el.append("rect")
+                    .attr("class", "scrubbing-position")
+                    .attr("width", 1)
+                    .attr("height", that.height)
+                    .attr("fill", "red")
+                    .attr("x", that.x.range()[0]);
+                that.currentPlayFrame = 0;
+                that.show_frame_while_playing();
             });
         }).fail(function() {
             console.err("Error fetching video frames");
@@ -233,6 +254,36 @@ class VideoTimelineVisualizer extends BaseVisualizer {
             .attr("class", "axis axis--x")
             .attr("transform", "translate(0," + that.height + ")")
             .call(that.xAxis);
+    }
+    show_frame_while_playing() {
+        var that = this;
+        var timeOfCurrentPlayFrame = (that.x.domain()[1]-that.x.domain()[0])*that.currentPlayFrame/1000.0 + that.x.domain()[0].getTime();
+        var closestElementAfterCurrentPlayTime;
+        var closestTime = 999999999999;
+        d3.selectAll(".video-frame").each(function(n) {
+            var vf_el = d3.select(this);
+            vf_el.style("opacity", 0);
+            var element_time = vf_el.attr("data-time");
+            element_time = new Date(parseInt(element_time));
+            var time_difference = timeOfCurrentPlayFrame-element_time;
+            if (time_difference > 0 && time_difference < closestTime) {
+                closestTime = time_difference;
+                closestElementAfterCurrentPlayTime = vf_el;
+            }
+        });
+        if (closestElementAfterCurrentPlayTime) {
+            closestElementAfterCurrentPlayTime.style("opacity", 1);
+        }
+        d3.select(".scrubbing-position").attr("x", that.x(timeOfCurrentPlayFrame));
+
+        that.currentPlayFrame += 1;
+        if (that.currentPlayFrame < 1000) {
+            setTimeout(function() {
+                that.show_frame_while_playing();
+            }, 5);
+        } else {
+            d3.select(".scrubbing-position").remove();
+        }
     }
     chooseFrames(frames) {
         var ideal_n_frames = Math.floor(this.width / this.frameWidth);
