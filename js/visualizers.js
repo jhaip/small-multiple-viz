@@ -179,26 +179,60 @@ class VideoTimelineVisualizer extends BaseVisualizer {
         this.visualType = "video-timeline";
         this.frameWidth = 133;
         this.frameHeight = 100;
+
+        this.xAxis = d3.axisBottom(this.x);
     }
-    create_el() {
-        this.parent_el.append("h4").text("Source: "+this.source);
-        this.el = this.parent_el.append("div")
-            .attr("class", "focus")
-            .style("width", this.svg_width+"px")
-            .style("height", this.svg_height+"px")
-            .style("overflow-y", "scroll");
-    }
+    // create_el() {
+    //     this.parent_el.append("h4").text("Source: "+this.source);
+    //     this.el = this.parent_el.append("div")
+    //         .attr("class", "focus")
+    //         .style("width", this.svg_width+"px")
+    //         .style("height", this.svg_height+"px")
+    //         .style("overflow-y", "scroll");
+    // }
     visualize() {
         var that = this;
         this.fetchFrames(this.x.domain()[0], this.x.domain()[1]).done(function(data) {
             $.each(that.chooseFrames(data), function(i, r) {
-                that.el.append("img")
-                    .attr("width", that.frameWidth, that.frameHeight)
-                    .attr("src", "http://192.168.2.13:5000/clips/"+r);
+                // that.el.append("img")
+                //     .attr("width", that.frameWidth, that.frameHeight)
+                //     .attr("src", "http://192.168.2.13:5000/clips/"+r);
+                that.el.selectAll('.video-frame')
+                    .data(data)
+                    .enter().append("image")
+                    .attr("class", "video-frame")
+                    .attr("width", that.frameWidth)
+                    .attr("height", that.frameHeight)
+                    .attr("xlink:href", function(d) {
+                        return "http://192.168.2.13:5000/clips/"+d;
+                    })
+                    .attr("x", function(d) {
+                        var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
+                        var dat = parseTime(d.substring(5,25));
+                        return that.x(dat);
+                    });
+
+                that.el.selectAll('.video-frame-tick')
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "video-frame-tick")
+                    .attr("width", 3)
+                    .attr("height", 10)
+                    .attr("fill", "blue")
+                    .attr("x", function(d) {
+                        var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
+                        var dat = parseTime(d.substring(5,25));
+                        return that.x(dat);
+                    });
             });
         }).fail(function() {
             console.err("Error fetching video frames");
         });
+
+        this.el.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + that.height + ")")
+            .call(that.xAxis);
     }
     chooseFrames(frames) {
         var ideal_n_frames = Math.floor(this.width / this.frameWidth);
@@ -238,7 +272,7 @@ class VideoTimelineVisualizer extends BaseVisualizer {
             if (d.date >= that.x.domain()[0] && d.date <= that.x.domain()[1]) {
                 that.data_in_brush.push(d);
             }
-        })
+        });
 
         // TODO: use D3 data update binding instead of replacing the entire visual
         this.el.html("");
