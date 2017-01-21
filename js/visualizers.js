@@ -189,20 +189,23 @@ class VideoTimelineVisualizer extends BaseVisualizer {
             .style("overflow-y", "scroll");
     }
     visualize() {
+        var that = this;
         this.fetchFrames(this.x.domain()[0], this.x.domain()[1]).done(function(data) {
-            $.each(chooseFrames(data), function(i, r) {
-                this.el.append('<img src="http://192.168.2.13:5000/clips/'+r+'" width="133" height="100">');
+            $.each(that.chooseFrames(data), function(i, r) {
+                that.el.append("img")
+                    .attr("width", that.frameWidth, that.frameHeight)
+                    .attr("src", "http://192.168.2.13:5000/clips/"+r);
             });
         }).fail(function() {
             console.err("Error fetching video frames");
         });
     }
     chooseFrames(frames) {
-        ideal_n_frames = Math.floor(this.width / this.frameWidth);
+        var ideal_n_frames = Math.floor(this.width / this.frameWidth);
         if (frames.length > ideal_n_frames) {
             var offset = Math.floor(frames.length / ideal_n_frames);
             var r = [];
-            for (var i=0; i<frames.length, i+=offset) {
+            for (var i=0; i<frames.length; i+=offset) {
                 r.push(frames[i]);
             }
             return r;
