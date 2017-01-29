@@ -1,17 +1,21 @@
-var data = [
-    {"source": "A0", "date": "2017-01-18T14:13:11.471Z", "price": 2},
-    {"source": "A0", "date": "2017-01-19T14:13:11.471Z", "price": 5},
-    {"source": "A0", "date": "2017-01-20T14:13:11.471Z", "price": 0},
-    {"source": "D1", "date": "2017-01-18T14:13:11.471Z", "price": 1},
-    {"source": "D1", "date": "2017-01-18T14:14:11.471Z", "price": 0},
-    {"source": "D1", "date": "2017-01-18T14:15:11.471Z", "price": 1},
-    {"source": "D1", "date": "2017-01-18T14:16:11.471Z", "price": 0},
-    {"source": "D1", "date": "2017-01-21T14:13:11.471Z", "price": 1},
-    {"source": "D1", "date": "2017-01-21T14:14:11.471Z", "price": 0},
-    {"source": "D1", "date": "2017-01-21T14:15:11.471Z", "price": 1},
-    {"source": "D1", "date": "2017-01-21T14:16:11.471Z", "price": 0}
-];
-var last_day = 3;
+// var data = [
+//     {"source": "A0", "date": "2017-01-18T14:13:11.471Z", "price": 2},
+//     {"source": "A0", "date": "2017-01-19T14:13:11.471Z", "price": 5},
+//     {"source": "A0", "date": "2017-01-20T14:13:11.471Z", "price": 0},
+//     {"source": "D1", "date": "2017-01-18T14:13:11.471Z", "price": 1},
+//     {"source": "D1", "date": "2017-01-18T14:14:11.471Z", "price": 0},
+//     {"source": "D1", "date": "2017-01-18T14:15:11.471Z", "price": 1},
+//     {"source": "D1", "date": "2017-01-18T14:16:11.471Z", "price": 0},
+//     {"source": "D1", "date": "2017-01-21T14:13:11.471Z", "price": 1},
+//     {"source": "D1", "date": "2017-01-21T14:14:11.471Z", "price": 0},
+//     {"source": "D1", "date": "2017-01-21T14:15:11.471Z", "price": 1},
+//     {"source": "D1", "date": "2017-01-21T14:16:11.471Z", "price": 0}
+// ];
+var data = [{"source": "A0", "date": "2017-01-29T19:06:30.307Z", "price": 0},
+            {"source": "A0", "date": "2017-01-29T19:06:40.407Z", "price": 1},
+            {"source": "D1", "date": "2017-01-29T19:06:30.407Z", "price": 1},
+            {"source": "D1", "date": "2017-01-29T19:06:40.407Z", "price": 0}];
+var last_day = 21;
 
 var visualTypeMap = {
     "line_graph": LineGraphVisualizer,
@@ -183,17 +187,19 @@ d3.select("#add-new-view").on("click", function() {
 });
 
 d3.select("#add-new-data").on("click", function() {
-    addNewDataPoint("B1", Math.random()*10);
+    addNewDataPoint("A0", Math.random()*10);
 });
 
-function addNewDataPoint(source, newValue) {
+function addNewDataPoint(source, newValue, date) {
     var beforeDomainEnd = new Date(x2.domain()[1]);
     var shouldExtendBrush = false;
     var beforeBrushDomain = d3.brushSelection(d3.select(".brush").node()).map(x2.invert, x2);
 
     last_day += 1;
-    var date = d3.isoFormat(new Date(2017, 0, last_day)),
-        price = newValue;
+    if (date === undefined) {
+        date = d3.isoFormat(new Date(2017, 0, last_day));
+    }
+    price = newValue;
     data.push(type({"source": source, "date": date, "price": price}));
 
 
