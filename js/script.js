@@ -11,10 +11,11 @@
 //     {"source": "D1", "date": "2017-01-21T14:15:11.471Z", "price": 1},
 //     {"source": "D1", "date": "2017-01-21T14:16:11.471Z", "price": 0}
 // ];
-var data = [{"source": "A0", "date": "2017-01-29T19:06:30.307Z", "price": 0},
-            {"source": "A0", "date": "2017-01-29T19:06:40.407Z", "price": 1},
-            {"source": "D1", "date": "2017-01-29T19:06:30.407Z", "price": 1},
-            {"source": "D1", "date": "2017-01-29T19:06:40.407Z", "price": 0}];
+// var data = [{"source": "A0", "date": "2017-01-29T19:06:30.307Z", "price": 0},
+//             {"source": "A0", "date": "2017-01-29T19:06:40.407Z", "price": 1},
+//             {"source": "D1", "date": "2017-01-29T19:06:30.407Z", "price": 1},
+//             {"source": "D1", "date": "2017-01-29T19:06:40.407Z", "price": 0}];
+var data = [];
 var last_day = 21;
 
 var visualTypeMap = {
@@ -115,6 +116,7 @@ context.append("g")
 
 function brushed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+    if (data.length === 0) return;
 
     var s = d3.event.selection || x2.range();
     // x.domain(s.map(x2.invert, x2));
@@ -193,7 +195,12 @@ d3.select("#add-new-data").on("click", function() {
 function addNewDataPoint(source, newValue, date) {
     var beforeDomainEnd = new Date(x2.domain()[1]);
     var shouldExtendBrush = false;
-    var beforeBrushDomain = d3.brushSelection(d3.select(".brush").node()).map(x2.invert, x2);
+    var beforeBrushDomain
+    if (data > 0) {
+        beforeBrushDomain = d3.brushSelection(d3.select(".brush").node()).map(x2.invert, x2);
+    } else {
+        shouldExtendBrush = true;
+    }
 
     last_day += 1;
     if (date === undefined) {

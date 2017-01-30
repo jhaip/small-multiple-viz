@@ -88,10 +88,11 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-function fetchSavedData() {
+function fetchSavedData(longPollStartTime) {
     let startDateStr = getParameterByName('start');
     let endDateStr = getParameterByName('stop');
     let i = getParameterByName('i');
+    let oldestDataTime;
 
     let fetchData;
     if (endDateStr) {
@@ -100,31 +101,58 @@ function fetchSavedData() {
         fetchData.query.filter.compositeFilter.filters[1].propertyFilter.value.timestampValue = startDateStr;
     } else {
         fetchData = startOnlyQuery;
-        fetchData.query.filter.propertyFilter.value.timestampValue = startDateStr;
+        if (longPollStartTime === undefined) {
+            fetchData.query.filter.propertyFilter.value.timestampValue = startDateStr;
+        } else {
+            fetchData.query.filter.propertyFilter.value.timestampValue = longPollStartTime.toISOString();;
+            oldestDataTime = longPollStartTime;
+        }
     }
 
-    $.ajax({
+    var r = ajaxFetch(fetchData);
+    r.done(function(data) {
+        if (data.batch.entityResults) {
+            const nTests = data.batch.entityResults.length;
+            for (let x of data.batch.entityResults) {
+                if (x.entity.properties.data.stringValue !== "START") {
+                    var t = new Date(x.entity.properties.published_at.timestampValue);
+                    if (oldestDataTime === undefined || t > oldestDataTime) {
+                        oldestDataTime = t;
+                    }
+                    t = d3.isoFormat(t);
+                    addNewDataPoint("A0", parseInt(x.entity.properties.data.integerValue), t);
+                } else {
+                    console.log("START value not supposed to be included");
+                }
+            }
+        } else {
+            console.log("no data");
+        }
+
+        // long polling
+        if (!endDateStr) {
+            console.log("starting log polling");
+            setTimeout(function() {
+                console.log("looking for new data");
+                fetchSavedData(oldestDataTime);
+            }, 1000);
+        }
+
+    }).fail(function(error) {
+        console.error(error);
+    });
+}
+
+function ajaxFetch(requestData) {
+    return $.ajax({
         url: "https://datastore.googleapis.com/v1/projects/photon-data-collection:runQuery?fields=batch%2Cquery&key=AIzaSyD-a9IF8KKYgoC3cpgS-Al7hLQDbugrDcw&alt=json",
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.GlziA_oevtgdq8xlg0TKVGlsDJSm-mQX_X2G9Vm0Fg_9PUrZesYVw4O40dD6bhXI8TGtN0Eq6gB40uhZIBXxO0AmJX2No-YNPX9P-dY7v75zUvRvFVS9Jvl1O-wRWA"
+            "Authorization": "Bearer ya29.GlzjA6GAUB7g-pKzXzDulU3qJpiQiaUs6WQwIWj9WGjyGY7B5xMvdn4CizX2UUX9qkRjPPgfj3nGqwG-JAMW6l3QfND56Ycox4FhI7Sl04sHvAJQxJoa-5dFUIz4tw"
         },
         dataType: "json",
-        data: JSON.stringify(fetchData)
-    }).done(function(data) {
-        const nTests = data.batch.entityResults.length;
-        for (let x of data.batch.entityResults) {
-            if (x.entity.properties.data.stringValue !== "START") {
-                var t = new Date(x.entity.properties.published_at.timestampValue);
-                t = d3.isoFormat(t);
-                addNewDataPoint("A0", parseInt(x.entity.properties.data.integerValue), t);
-            } else {
-                console.log("START value not supposed to be included");
-            }
-        }
-    }).fail(function(error) {
-        console.error(error);
+        data: JSON.stringify(requestData)
     });
 }
 
