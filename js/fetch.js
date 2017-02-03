@@ -109,51 +109,59 @@ function fetchSavedData(longPollStartTime) {
         }
     }
 
-    var r = ajaxFetch(fetchData);
-    r.done(function(data) {
-        if (data.batch.entityResults) {
-            const nTests = data.batch.entityResults.length;
-            for (let x of data.batch.entityResults) {
-                if (x.entity.properties.data.stringValue !== "START") {
-                    var t = new Date(x.entity.properties.published_at.timestampValue);
-                    if (oldestDataTime === undefined || t > oldestDataTime) {
-                        oldestDataTime = t;
-                    }
-                    t = d3.isoFormat(t);
-                    addNewDataPoint("A0", parseInt(x.entity.properties.data.integerValue), t);
-                } else {
-                    console.log("START value not supposed to be included");
-                }
-            }
-        } else {
-            console.log("no data");
-        }
+    gapi.client.datastore.projects.runQuery({
+      projectId: 'photon-data-collection',
+      query: fetchData.query
+    }).then(function(response) {
+      console.log(response.result);
+      const data = response.result;
 
-        // long polling
-        if (!endDateStr) {
-            console.log("starting log polling");
-            setTimeout(function() {
-                console.log("looking for new data");
-                fetchSavedData(oldestDataTime);
-            }, 1000);
-        }
+      if (data.batch.entityResults) {
+          const nTests = data.batch.entityResults.length;
+          for (let x of data.batch.entityResults) {
+              if (x.entity.properties.data.stringValue !== "START") {
+                  var t = new Date(x.entity.properties.published_at.timestampValue);
+                  if (oldestDataTime === undefined || t > oldestDataTime) {
+                      oldestDataTime = t;
+                  }
+                  t = d3.isoFormat(t);
+                  addNewDataPoint("A0", parseInt(x.entity.properties.data.integerValue), t);
+              } else {
+                  console.log("START value not supposed to be included");
+              }
+          }
+      } else {
+          console.log("no data");
+      }
 
-    }).fail(function(error) {
-        console.error(error);
+      // long polling
+      if (!endDateStr) {
+          console.log("starting log polling");
+          setTimeout(function() {
+              console.log("looking for new data");
+              fetchSavedData(oldestDataTime);
+          }, 1000);
+      }
+
+    }, function(reason) {
+      console.log('Error: ' + reason.result.error.message);
+      alert('Error: ' + reason.result.error.message);
+      alert('Redirecting to login page');
+      window.location.href = '/auth.html';
     });
 }
 
-function ajaxFetch(requestData) {
-    return $.ajax({
-        url: "https://datastore.googleapis.com/v1/projects/photon-data-collection:runQuery?fields=batch%2Cquery&key=AIzaSyD-a9IF8KKYgoC3cpgS-Al7hLQDbugrDcw&alt=json",
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer ya29.GlzjA6GAUB7g-pKzXzDulU3qJpiQiaUs6WQwIWj9WGjyGY7B5xMvdn4CizX2UUX9qkRjPPgfj3nGqwG-JAMW6l3QfND56Ycox4FhI7Sl04sHvAJQxJoa-5dFUIz4tw"
-        },
-        dataType: "json",
-        data: JSON.stringify(requestData)
-    });
-}
+function start() {
+  // 2. Initialize the JavaScript client library.
+  gapi.client.init({
+    'apiKey': 'AIzaSyD1qRhXFoSvC8Wj0oZ_Ww5WLJxptt-HTgE',
+    'discoveryDocs': ['https://datastore.googleapis.com/$discovery/rest?version=v1'],
+    // clientId and scope are optional if auth is not required.
+    'clientId': '378739939891-k9hivlpuamla964gs2hpbu52ckpgocp0.apps.googleusercontent.com',
+    'scope': 'https://www.googleapis.com/auth/datastore',
+  }).then(function() {
+    fetchSavedData();
+  });
+};
 
-fetchSavedData();
+gapi.load('client', start);

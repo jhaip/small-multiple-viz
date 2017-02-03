@@ -1,51 +1,32 @@
-// fetch test lists from google
-fetchData = {
-  "query":
-  {
-    "kind":
-    [
-      {
-        "name": "ParticleEvent"
+function start() {
+  // 2. Initialize the JavaScript client library.
+  gapi.client.init({
+    'apiKey': 'AIzaSyD1qRhXFoSvC8Wj0oZ_Ww5WLJxptt-HTgE',
+    'discoveryDocs': ['https://datastore.googleapis.com/$discovery/rest?version=v1'],
+    // clientId and scope are optional if auth is not required.
+    'clientId': '378739939891-k9hivlpuamla964gs2hpbu52ckpgocp0.apps.googleusercontent.com',
+    'scope': 'https://www.googleapis.com/auth/datastore',
+  }).then(function() {
+    return gapi.client.datastore.projects.runQuery({
+      projectId: 'photon-data-collection',
+      query: {
+        "kind": [{"name": "ParticleEvent"}],
+        "filter": {
+            "propertyFilter": {
+                "property": {
+                    "name": "data"
+                },
+                "value": {
+                    "stringValue": "START"
+                },
+                "op": "EQUAL"
+            }
+        }
       }
-    ],
-    "filter":
-    {
-      "propertyFilter":
-      {
-        "property":
-        {
-          "name": "data"
-        },
-        "value":
-        {
-          "stringValue": "START"
-        },
-        "op": "EQUAL"
-      }
-    }
-  }
-};
-// fetchData = {
-//   "query":
-//   {
-//     "kind":
-//     [
-//       {
-//         "name": "ParticleEvent"
-//       }
-//     ]
-//   }
-// };
-$.ajax({
-    url: "https://datastore.googleapis.com/v1/projects/photon-data-collection:runQuery?fields=batch%2Cquery&key=AIzaSyD-a9IF8KKYgoC3cpgS-Al7hLQDbugrDcw&alt=json",
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer ya29.GlzjA6GAUB7g-pKzXzDulU3qJpiQiaUs6WQwIWj9WGjyGY7B5xMvdn4CizX2UUX9qkRjPPgfj3nGqwG-JAMW6l3QfND56Ycox4FhI7Sl04sHvAJQxJoa-5dFUIz4tw"
-    },
-    dataType: "json",
-    data: JSON.stringify(fetchData)
-}).done(function(data) {
+    });
+  }).then(function(response) {
+    console.log(response.result);
+    const data = response.result;
     const nTests = data.batch.entityResults.length;
     const $parent = $(".test-run-list");
 
@@ -65,6 +46,12 @@ $.ajax({
         $newEl = $("<li></li>").append($newEl);
         $parent.append($newEl);
     }
-}).fail(function(error) {
-    console.error(error);
-});
+  }, function(reason) {
+    console.log('Error: ' + reason.result.error.message);
+    alert('Error: ' + reason.result.error.message);
+    alert('Redirecting to login page');
+    window.location.href = '/auth.html';
+  });
+};
+
+gapi.load('client', start);
