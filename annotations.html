@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test fetching and saving annotations</title>
+    <meta charset='utf-8' />
+  </head>
+  <body>
+
+    <h3>Add a new annotation</h3>
+    <div>
+        <textarea class="c-new-annotation__text" rows="4" cols="50" placeholder="add your new annotation value here"></textarea>
+        <input type="submit" value="Submit" class="c-new-annotation__submit">
+    </div>
+
+    <h3>Annotations</h3>
+    <ul class="annotation-list"></ul>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script type="text/javascript">
+
+    function commitTransaction(transaction_id, value) {
+
+        var mutations = [{
+            "insert": {
+                "key": {
+                    "partitionId": {
+                        "projectId": "photon-data-collection"
+                    },
+                    "path": [
+                        {
+                            "kind": "Annotation"
+                        }
+                    ]
+                },
+                "properties": {
+                    "type": {
+                        "stringValue": "markdown"
+                    },
+                    "value": {
+                        "stringValue": "# Hello World"
+                    },
+                    "timestamp": {
+                        "timestampValue": "2017-01-29T16:50:29.698Z"
+                    }
+                }
+            }
+        }];
+        mutations[0].insert.properties.timestamp.timestampValue = (new Date()).toISOString();
+        mutations[0].insert.properties.value.stringValue = value;
+
+        gapi.client.datastore.projects.commit({
+            projectId: 'photon-data-collection',
+            transaction: transaction_id,
+            mutations: mutations
+        }).then(function(response) {
+            console.log(response.result);
+        }, function(reason) {
+            console.log('Error: ' + reason.result.error.message);
+        });
+    }
+
+    function beginTransaction(success_callback) {
+        gapi.client.datastore.projects.beginTransaction({
+            projectId: 'photon-data-collection'
+        }).then(function(response) {
+            console.log(response.result);
+            if (response.result.transaction) {
+                success_callback(response.result.transaction);
+            }
+        }, function(reason) {
+            console.log('Error: ' + reason.result.error.message);
+        });
+    }
+
+    function listAnnotations() {
+        var query = {
+            "kind": [
+                {
+                    "name": "Annotation"
+                }
+            ],
+            "filter": {
+                "compositeFilter": {
+                    "filters": [
+                        {
+                            "propertyFilter": {
+                                "property": {
+                                    "name": "timestamp"
+                                },
+                                "op": "LESS_THAN",
+                                "value": {
+                                    "timestampValue": "2017-02-06T19:10:34.372999Z"
+                                }
+                            }
+                        },
+                        {
+                            "propertyFilter": {
+                                "property": {
+                                    "name": "timestamp"
+                                },
+                                "value": {
+                                    "timestampValue": "2017-01-01T19:07:51.476999Z"
+                                },
+                                "op": "GREATER_THAN"
+                            }
+                        }
+                    ],
+                    "op": "AND"
+                }
+            }
+        };
+
+        gapi.client.datastore.projects.runQuery({
+          projectId: 'photon-data-collection',
+          query: query
+        }).then(function(response) {
+            console.log(response.result);
+            const data = response.result;
+            data.batch.entityResults.forEach(function(r) {
+              var e = $("<li></li>").html(r.entity.properties.timestamp.timestampValue + " - " +r.entity.properties.value.stringValue);
+              $(".annotation-list").append(e);
+            });
+        }, function(reason) {
+            console.log('Error: ' + reason.result.error.message);
+        });
+    }
+
+    function start() {
+      // 2. Initialize the JavaScript client library.
+      gapi.client.init({
+        'apiKey': 'AIzaSyD1qRhXFoSvC8Wj0oZ_Ww5WLJxptt-HTgE',
+        'discoveryDocs': ['https://datastore.googleapis.com/$discovery/rest?version=v1'],
+        // clientId and scope are optional if auth is not required.
+        'clientId': '378739939891-k9hivlpuamla964gs2hpbu52ckpgocp0.apps.googleusercontent.com',
+        'scope': 'https://www.googleapis.com/auth/datastore',
+      }).then(function() {
+        // beginTransaction();
+        listAnnotations();
+        $(".c-new-annotation__submit").click(function(e) {
+            e.preventDefault();
+            beginTransaction(function(transaction_id) {
+                commitTransaction(transaction_id, $(".c-new-annotation__text").val());
+                $(".c-new-annotation__text").val("");
+            });
+        });
+      });
+    };
+
+    gapi.load('client', start);
+
+    </script>
+  </body>
+</html>
