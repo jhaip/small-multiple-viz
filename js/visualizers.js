@@ -343,44 +343,32 @@ class GithubCommitVisualizer extends BaseVisualizer {
     visualize() {
         var that = this;
 
-        var user = new Gh3.User("jhaip");
-        var repo = new Gh3.Repository("small-multiple-viz", user);
-
-        repo.fetch(function (err, res) {
-            if(err) { throw "outch ..." }
-
-            repo.fetchBranches(function (err, res) {
-                if(err) { throw "outch ..." }
-
-                var master = repo.getBranchByName("master");
-
-                master.fetchContents(function (err, res) {
-                    if(err) { throw "outch ..." }
-
-                    var f = master.getFileByName("index.html");
-                    f.fetchCommits(function( err, res) {
-                        if(err) { throw "outch ..." }
-
-                        f.reverseCommits();
-                        console.log(f.getCommits());
-                        f.eachCommit(function (content) {
-                            that.el.append("circle")
-                                .attr("cx", function(d) {
-                                    var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
-                                    var dat = parseTime(content.date);
-                                    console.log(content.date);
-                                    console.log(that.x.domain());
-                                    return that.x(dat);
-                                })
-                                .attr("cy", 0)
-                                .attr("r", 5)
-                                .style("fill", "blue");
-                        });
-
-                        that.data = f.getCommits();
-                    });
-                });
+        $.ajax({
+            type: "GET",
+            url: "https://api.github.com/repos/jhaip/small-multiple-viz/commits",
+            headers: {
+                "Authorization": "Basic "+btoa("jhaip:94d42ab004e30d40bd48d3f5eac93c00db1eaa84")
+            },
+            data: {
+                sha: "master",
+                path: "index.html"
+            }
+        }).done(function(commits) {
+            console.log(commits);
+            commits.forEach(function(c) {
+                that.el.append("circle")
+                    .attr("cx", function(d) {
+                        var parseTime = d3.timeParse("%Y-%m-%dT%H:%M:%SZ");
+                        var dat = parseTime(c.commit.author.date);
+                        return that.x(dat);
+                    })
+                    .attr("cy", 0)
+                    .attr("r", 5)
+                    .style("fill", "blue")
+                    .style("opacity", 0.3);
             });
+        }).fail(function(err) {
+            console.error(err);
         });
 
         this.el.append("g")
@@ -407,11 +395,11 @@ class GithubCommitVisualizer extends BaseVisualizer {
 
     // TODO: use an actual domain
     update_brushing(s, x2) {
-        this.x.domain([new Date(2017, 1, 1), new Date()]);
+        this.x.domain([new Date(2017, 0, 1), new Date()]);
         this.update_graph_after_brushing();
     }
     update_brushing_with_domain(domain) {
-        this.x.domain([new Date(2017, 1, 1), new Date()]);
+        this.x.domain([new Date(2017, 0, 1), new Date()]);
         this.update_graph_after_brushing();
     }
 }

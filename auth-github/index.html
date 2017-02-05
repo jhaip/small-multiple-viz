@@ -15,54 +15,21 @@
   <script src="gh3.js"></script>
   <script>
 
-    var k33g = new Gh3.User("jhaip")
-      ,	repoTitle = $("h1")
-      ,	branchTitle = $("h2")
-      ,	dirContents = $("ul");
-
-    var k33gBlog = new Gh3.Repository("small-multiple-viz", k33g);
-
-    k33gBlog.fetch(function (err, res) {
-      if(err) { throw "outch ..." }
-
-      repoTitle.html(k33gBlog.full_name);
-
-      k33gBlog.fetchBranches(function (err, res) {
-        if(err) { throw "outch ..." }
-
-        var master = k33gBlog.getBranchByName("master");
-        branchTitle.html(master.name + " (" + master.sha + ") :");
-
-        master.fetchContents(function (err, res) {
-          if(err) { throw "outch ..." }
-
-        //   console.log(master.getContents());
-          //
-        //   master.reverseContents();
-          //
-        //   master.eachContent(function (content) {
-        //     console.log(content.name, content.type, content.size);
-        //     dirContents.append('<li>'+content.name+" type : "+content.type+" size : "+content.size);
-        //   });
-          var f = master.getFileByName("index.html");
-          f.fetchCommits(function( err, res) {
-              if(err) { throw "outch ..." }
-
-              f.reverseCommits();
-
-              console.log(f.getCommits());
-
-                f.eachCommit(function (content) {
-                  console.log(content.date, content.message, content.url);
-                  dirContents.append('<li>'+content.date+" type : "+content.message+" size : "+content.url);
-                });
-          });
-
-        });
-
-      })
+    $.ajax({
+        type: "GET",
+        url: "https://api.github.com/repos/jhaip/small-multiple-viz/commits",
+        headers: {
+            "Authorization": "Basic "+btoa("jhaip:94d42ab004e30d40bd48d3f5eac93c00db1eaa84")
+        },
+        data: {
+            sha: "master",
+            path: "index.html"
+        }
+    }).done(function(d) {
+        console.log(d);
+    }).fail(function(err) {
+        console.error(err);
     });
-
 
   </script>
 </body>
