@@ -330,3 +330,88 @@ class VideoTimelineVisualizer extends BaseVisualizer {
         this.visualize();
     }
 }
+
+class GithubCommitVisualizer extends BaseVisualizer {
+    constructor(source, data, parent_el, svg_width, svg_height, options) {
+        svg_height = 50; // overrride for now
+        super(source, data, parent_el, svg_width, svg_height, options);
+        this.data_in_brush = this.data;
+        this.visualType = "github-commits";
+
+        this.xAxis = d3.axisBottom(this.x);
+    }
+    visualize() {
+        var that = this;
+
+        var user = new Gh3.User("jhaip");
+        var repo = new Gh3.Repository("small-multiple-viz", user);
+
+        repo.fetch(function (err, res) {
+            if(err) { throw "outch ..." }
+
+            repo.fetchBranches(function (err, res) {
+                if(err) { throw "outch ..." }
+
+                var master = repo.getBranchByName("master");
+
+                master.fetchContents(function (err, res) {
+                    if(err) { throw "outch ..." }
+
+                    var f = master.getFileByName("index.html");
+                    f.fetchCommits(function( err, res) {
+                        if(err) { throw "outch ..." }
+
+                        f.reverseCommits();
+                        console.log(f.getCommits());
+                        f.eachCommit(function (content) {
+                            that.el.append("circle")
+                                .attr("cx", function(d) {
+                                    var parseTime = d3.timeParse("%Y-%m-%dT%H-%M-%SZ");
+                                    var dat = parseTime(content.date);
+                                    console.log(content.date);
+                                    console.log(that.x.domain());
+                                    return that.x(dat);
+                                })
+                                .attr("cy", 0)
+                                .attr("r", 5)
+                                .style("fill", "blue");
+                        });
+
+                        that.data = f.getCommits();
+                    });
+                });
+            });
+        });
+
+        this.el.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + that.height + ")")
+            .call(that.xAxis);
+    }
+    update_data(newData) {
+        this.data = newData;
+        this.update_graph_after_brushing();
+    }
+    update_graph_after_brushing() {
+        var that = this;
+        this.data_in_brush = [];
+        this.data.forEach(function(d) {
+            if (d.date >= that.x.domain()[0] && d.date <= that.x.domain()[1]) {
+                that.data_in_brush.push(d);
+            }
+        });
+
+        this.el.html("");
+        this.visualize();
+    }
+
+    // TODO: use an actual domain
+    update_brushing(s, x2) {
+        this.x.domain([new Date(2017, 1, 1), new Date()]);
+        this.update_graph_after_brushing();
+    }
+    update_brushing_with_domain(domain) {
+        this.x.domain([new Date(2017, 1, 1), new Date()]);
+        this.update_graph_after_brushing();
+    }
+}

@@ -21,7 +21,8 @@ var last_day = 21;
 var visualTypeMap = {
     "line_graph": LineGraphVisualizer,
     "log": LogVisualizer,
-    "video-timeline": VideoTimelineVisualizer
+    "video-timeline": VideoTimelineVisualizer,
+    "github-commits": GithubCommitVisualizer
 }
 
 var svg = d3.select("svg.svg--overall"),
