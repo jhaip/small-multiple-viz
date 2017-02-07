@@ -22,7 +22,8 @@ var visualTypeMap = {
     "line_graph": LineGraphVisualizer,
     "log": LogVisualizer,
     "video-timeline": VideoTimelineVisualizer,
-    "github-commits": GithubCommitVisualizer
+    "github-commits": GithubCommitVisualizer,
+    "annotations": AnnotationVisualizer
 }
 
 var svg = d3.select("svg.svg--overall"),

@@ -347,7 +347,7 @@ class GithubCommitVisualizer extends BaseVisualizer {
             type: "GET",
             url: "https://api.github.com/repos/jhaip/small-multiple-viz/commits",
             headers: {
-                "Authorization": "Basic "+btoa("jhaip:94d42ab004e30d40bd48d3f5eac93c00db1eaa84")
+                "Authorization": "Basic "+btoa("jhaip:TODO")
             },
             data: {
                 sha: "master",
@@ -389,6 +389,194 @@ class GithubCommitVisualizer extends BaseVisualizer {
             }
         });
 
+        this.el.html("");
+        this.visualize();
+    }
+
+    // TODO: use an actual domain
+    update_brushing(s, x2) {
+        this.x.domain([new Date(2017, 0, 1), new Date()]);
+        this.update_graph_after_brushing();
+    }
+    update_brushing_with_domain(domain) {
+        this.x.domain([new Date(2017, 0, 1), new Date()]);
+        this.update_graph_after_brushing();
+    }
+}
+
+
+class AnnotationVisualizer extends BaseVisualizer {
+    constructor(source, data, parent_el, svg_width, svg_height, options) {
+        super(source, data, parent_el, svg_width, svg_height, options);
+        this.data_in_brush = this.data;
+        this.visualType = "log";
+        this.fetched_ajax_data = false;
+    }
+    create_el() {
+        var that = this;
+        this.parent_el.append("h4").text("Source: "+this.source);
+        this.el = this.parent_el.append("div")
+            .attr("class", "annotation-list")
+            .style("width", this.svg_width+"px")
+            .style("height", this.svg_height+"px")
+            .style("border", "1px solid green")
+            .style("overflow-y", "scroll");
+        var $newAnnotation = this.parent_el.append("div").attr("class", "c-new-annotation");
+        $newAnnotation.append("textarea").attr("class", "c-new-annotation__text");
+        $newAnnotation.append("input")
+            .attr("class", "c-new-annotation__submit")
+            .attr("type", "submit")
+            .attr("value", "Submit");
+
+        $(".c-new-annotation__submit").click(function(e) {
+            e.preventDefault();
+            console.log($(that.parent_el[0]));
+            that.beginTransaction(function(transaction_id) {
+                that.commitTransaction(transaction_id, $(that.parent_el.node()).find(".c-new-annotation__text").val());
+                $(that.parent_el.node()).find(".c-new-annotation__text").val("");
+            });
+        });
+    }
+    visualize() {
+        var that = this;
+
+        if (that.fetched_ajax_data === false) {
+            console.log("fetching");
+            that.listAnnotations().then(function(response) {
+                console.log(response.result);
+                that.data = response.result.batch.entityResults;
+                that.fetched_ajax_data = true;
+
+                that.el.selectAll(".log-value")
+                    .data(that.data)
+                  .enter().append("p")
+                    .attr("class", "log-value")
+                    .text(function(d) {
+                        return "(" + d.entity.properties.timestamp.timestampValue + ") " + d.entity.properties.value.stringValue;
+                    });
+            }, function(reason) {
+                console.log('Error: ' + reason.result.error.message);
+            });
+        } else {
+            that.el.selectAll(".log-value")
+                .data(that.data)
+              .enter().append("p")
+                .attr("class", "log-value")
+                .text(function(d) {
+                    return "(" + d.entity.properties.timestamp.timestampValue + ") " + d.entity.properties.value.stringValue;
+                });
+        }
+    }
+    commitTransaction(transaction_id, value) {
+
+        var mutations = [{
+            "insert": {
+                "key": {
+                    "partitionId": {
+                        "projectId": "photon-data-collection"
+                    },
+                    "path": [
+                        {
+                            "kind": "Annotation"
+                        }
+                    ]
+                },
+                "properties": {
+                    "type": {
+                        "stringValue": "markdown"
+                    },
+                    "value": {
+                        "stringValue": "# Hello World"
+                    },
+                    "timestamp": {
+                        "timestampValue": "2017-01-29T16:50:29.698Z"
+                    }
+                }
+            }
+        }];
+        mutations[0].insert.properties.timestamp.timestampValue = (new Date()).toISOString();
+        mutations[0].insert.properties.value.stringValue = value;
+
+        gapi.client.datastore.projects.commit({
+            projectId: 'photon-data-collection',
+            transaction: transaction_id,
+            mutations: mutations
+        }).then(function(response) {
+            console.log(response.result);
+        }, function(reason) {
+            console.log('Error: ' + reason.result.error.message);
+        });
+    }
+
+    beginTransaction(success_callback) {
+        gapi.client.datastore.projects.beginTransaction({
+            projectId: 'photon-data-collection'
+        }).then(function(response) {
+            console.log(response.result);
+            if (response.result.transaction) {
+                success_callback(response.result.transaction);
+            }
+        }, function(reason) {
+            console.log('Error: ' + reason.result.error.message);
+        });
+    }
+    listAnnotations() {
+        var query = {
+            "kind": [
+                {
+                    "name": "Annotation"
+                }
+            ],
+            "filter": {
+                "compositeFilter": {
+                    "filters": [
+                        {
+                            "propertyFilter": {
+                                "property": {
+                                    "name": "timestamp"
+                                },
+                                "op": "LESS_THAN",
+                                "value": {
+                                    "timestampValue": (new Date()).toISOString()
+                                }
+                            }
+                        },
+                        {
+                            "propertyFilter": {
+                                "property": {
+                                    "name": "timestamp"
+                                },
+                                "value": {
+                                    "timestampValue": "2017-01-01T19:07:51.476999Z"
+                                },
+                                "op": "GREATER_THAN"
+                            }
+                        }
+                    ],
+                    "op": "AND"
+                }
+            }
+        };
+
+        return gapi.client.datastore.projects.runQuery({
+          projectId: 'photon-data-collection',
+          query: query
+        });
+    }
+    update_data(newData) {
+        this.data = newData;
+        this.update_graph_after_brushing();
+    }
+    update_graph_after_brushing() {
+        var that = this;
+        this.data_in_brush = [];
+        this.data.forEach(function(d) {
+            if (d.date >= that.x.domain()[0] && d.date <= that.x.domain()[1]) {
+                that.data_in_brush.push(d);
+            }
+        })
+
+        // TODO: use D3 data update binding instead of replacing the entire visual
         this.el.html("");
         this.visualize();
     }
