@@ -1,4 +1,4 @@
-var dispatch = d3.dispatch("brushchange", "brushchange-request");
+var dispatch = d3.dispatch("brushchange", "brushchange-request", "hoverchange");
 var parent = d3.select("body");
 var updating = true;
 var update_count = 0;
