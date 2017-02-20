@@ -12,12 +12,18 @@ class BrushSpace {
         this.dispatch.on("hoverchange."+this.id, function(v) {
             that.mousemove(v);
         });
+        this.dispatch.on("statechange."+this.id, function(e) {
+            that.state_change(e);
+        });
 
         this.margin = {top: 20, right: 20, bottom: 20, left: 20};
         this.container_width = 960;
         this.container_height = 150;
 
         this.svg = this.parent.append("svg");
+
+        this.state = "";
+        this.annotationData = [];
 
         this.create_scene();
     }
@@ -74,6 +80,18 @@ class BrushSpace {
             .call(this.brush)
             .call(this.brush.move, this.x.range());
 
+        this.overlay = this.context.append("g")
+            .attr("class", "top-overlay")
+            .style("fill", "none");
+        this.overlay.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", this.width)
+            .attr("height", this.height);
+
+        this.overlay.selectAll(".annotation")
+            .data(this.annotationData);
+
         this.x.domain([new Date(2015, 0, 1), new Date(2016, 0, 1)]);
         this.y.domain([0, 1]);
 
@@ -81,13 +99,17 @@ class BrushSpace {
             this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
         }
 
-        this.context.select(".overlay")
+        this.context.select(".brush .overlay")
             // .on("mouseover", function() { focus.style("display", null); })
             // .on("mouseout", function() { focus.style("display", "none"); })
             .on("mousemove", function() {
                 var x0 = that.x.invert(d3.mouse(this)[0]);
                 that.dispatch.call("hoverchange", {}, x0);
-            });
+            })
+
+        this.overlay.on("click", function() {
+            that.clicked(d3.mouse(this));
+        });
     }
     update_scene() {
         var that = this;
@@ -114,6 +136,27 @@ class BrushSpace {
 
         this.context.select(".brush")
             .call(this.brush);
+
+        this.overlay.select("rect")
+            .attr("width", this.width)
+            .attr("height", this.height);
+
+        this.update_annotations();
+    }
+    update_annotations() {
+        var that = this;
+        var annotations = this.overlay.selectAll(".annotation")
+            .data(this.annotationData);
+
+        annotations.enter().append("circle")
+                .attr("class", "annotation")
+                .attr("r", 6)
+                .style("fill", "#0066ff")
+            .merge(annotations)
+                .attr("cx", function(d) { return that.x(d.x); })
+                .attr("cy", function(d) { return that.y(d.y); });
+
+        annotations.exit().remove();
     }
     resize(width, height) {
         this.container_width = width;
@@ -142,6 +185,23 @@ class BrushSpace {
         this.focus.attr("x1", this.x(x0))
             .attr("x2", this.x(x0));
     }
+    clicked(clickPosition) {
+        var x = this.x.invert(clickPosition[0]);
+        var y = this.y.invert(clickPosition[1]);
+        this.annotationData.push({x: x, y: y});
+        this.update_annotations();
+    }
+    state_change(e) {
+        this.state = e.state;
+        if (e.state === "annotation") {
+            // "Turn off the brush" https://groups.google.com/forum/#!topic/d3-js/YnjYAV3wcpU
+            this.context.select(".brush").style("display", "none").style("pointer-events", "none");
+            this.overlay.style("pointer-events", "all");
+        } else {
+            this.context.select(".brush").style("display", "inline").style("pointer-events", "all");
+            this.overlay.style("pointer-events", "none");
+        }
+    }
     brushed() {
         var s = d3.event.selection || this.x.range();
         var sDomain = s.map(this.x.invert, this.x);
@@ -154,7 +214,7 @@ class BrushSpace {
     }
     update_domain(newDomain) {
         this.x.domain(newDomain);
-        this.context.select(".axis--x").call(this.xAxis);
+        this.update_scene();
         this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
     }
     brush_change(e) {
