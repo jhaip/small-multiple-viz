@@ -31,7 +31,8 @@ class BrushSpace {
         var that = this;
 
         this.svg.attr("width", this.container_width)
-            .attr("height", this.container_height);
+            .attr("height", this.container_height)
+            .attr("class", "c-svg--"+this.id);
 
         this.width = +this.svg.attr("width") - this.margin.left - this.margin.right,
         this.height = +this.svg.attr("height") - this.margin.top - this.margin.bottom;
@@ -92,6 +93,13 @@ class BrushSpace {
         this.overlay.selectAll(".annotation")
             .data(this.annotationData);
 
+        var svgOffset = $(".c-svg--"+this.id).offset();
+        this.htmlOverlayContainer = this.parent.append("div")
+            .attr("class", "html-overlay-container")
+            .style("position", "absolute")
+            .style("top", svgOffset.top+this.margin.left+"px")
+            .style("left", svgOffset.left+this.margin.top+"px");
+
         this.x.domain([new Date(2015, 0, 1), new Date(2016, 0, 1)]);
         this.y.domain([0, 1]);
 
@@ -150,13 +158,31 @@ class BrushSpace {
 
         annotations.enter().append("circle")
                 .attr("class", "annotation")
-                .attr("r", 6)
+                .attr("r", 3)
                 .style("fill", "#0066ff")
             .merge(annotations)
                 .attr("cx", function(d) { return that.x(d.x); })
                 .attr("cy", function(d) { return that.y(d.y); });
 
         annotations.exit().remove();
+
+        var annotationTexts = this.overlay.selectAll(".annotation-text")
+            .data(this.annotationData);
+        annotationTexts.enter().append("text")
+                .attr("class", "annotation-text")
+                .attr("dx", 5)
+                .attr("dy", 5)
+                .style("stroke", "none")
+                .style("fill", "#0066ff")
+                .on("dblclick", function(d) {
+                    console.log("edit");
+                    console.log(d);
+                })
+            .merge(annotationTexts)
+                .text(function(d) { return d.text; })
+                .attr("x", function(d) { return that.x(d.x); })
+                .attr("y", function(d) { return that.y(d.y); });
+        annotationTexts.exit().remove();
     }
     resize(width, height) {
         this.container_width = width;
@@ -188,18 +214,42 @@ class BrushSpace {
     clicked(clickPosition) {
         var x = this.x.invert(clickPosition[0]);
         var y = this.y.invert(clickPosition[1]);
-        this.annotationData.push({x: x, y: y});
-        this.update_annotations();
+        var annotationId = guid();
+        var that = this;
+
+        this.queuedAnnotation = {id: annotationId, x: x, y: y, text: ""};
+        this.htmlOverlayContainer.append("textarea")
+            .attr("class", "active-annotation--"+annotationId)
+            .style("color", "#0066ff")
+            .style("position", "absolute")
+            .style("left", that.x(x)+"px")
+            .style("top", that.y(y)+"px");
+        $(".active-annotation--"+annotationId).focus();
+        change_state("post-annotation");
+
+        // this.annotationData.push({id: annotationId, x: x, y: y, text: "test"});
+        // this.update_annotations();
+        // change_state("post-annotation");
+        // $(".annotation--"+annotationId).focus();
     }
     state_change(e) {
         this.state = e.state;
-        if (e.state === "annotation") {
+        if (e.state === "annotation" || e.state === "post-annotation") {
             // "Turn off the brush" https://groups.google.com/forum/#!topic/d3-js/YnjYAV3wcpU
             this.context.select(".brush").style("display", "none").style("pointer-events", "none");
             this.overlay.style("pointer-events", "all");
         } else {
             this.context.select(".brush").style("display", "inline").style("pointer-events", "all");
             this.overlay.style("pointer-events", "none");
+
+            if (this.queuedAnnotation !== undefined) {
+                let $activeAnnotation = $(".active-annotation--"+this.queuedAnnotation.id);
+                this.queuedAnnotation.text = $activeAnnotation.val();
+                this.annotationData.push(this.queuedAnnotation);
+                this.update_annotations();
+                $activeAnnotation.remove();
+                this.queuedAnnotation = undefined;
+            }
         }
     }
     brushed() {

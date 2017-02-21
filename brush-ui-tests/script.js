@@ -5,6 +5,16 @@ var update_count = 0;
 var brushSpaces = [];
 var state = "";
 
+function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+}
+
 dispatch.on("brushchange-request", function(e) {
     if (updating === false) {
         updating = true;
@@ -19,18 +29,35 @@ for (var i = 0; i < 3; i+=1) {
 }
 updating = false;
 
-d3.select("body").on("keydown", function() {
-    if (d3.event.keyCode === 65) {
-        state = "annotation";
-        d3.select(".state").text("Annotation");
-        d3.select("body").style("cursor", "alias");
-        dispatch.call("statechange", {}, {state: state});
-    }
-}).on("keyup", function() {
-    if (d3.event.keyCode === 65) {
-        state = "";
+function change_state(newState) {
+    state = newState;
+    if (state === "") {
         d3.select(".state").text("");
         d3.select("body").style("cursor", "auto");
-        dispatch.call("statechange", {}, {state: state});
+    } else if (state === "annotation") {
+        d3.select(".state").text("Annotation");
+        d3.select("body").style("cursor", "alias");
+    } else if (state === "post-annotation") {
+        d3.select(".state").text("Post Annotation");
+        d3.select("body").style("cursor", "auto");
+    }
+    dispatch.call("statechange", {}, {state: state});
+}
+
+d3.select("body").on("keydown", function() {
+    if (state === "") {
+        if (d3.event.keyCode === 65) {
+            change_state("annotation");
+        }
+    } else if (state === "post-annotation") {
+        if (d3.event.keyCode === 27) {
+            change_state("");
+        }
+    }
+}).on("keyup", function() {
+    if (state === "") {
+        if (d3.event.keyCode === 65) {
+            change_state("");
+        }
     }
 });
