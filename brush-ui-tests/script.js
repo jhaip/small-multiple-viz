@@ -23,10 +23,11 @@ dispatch.on("brushchange-request", function(e) {
     }
 });
 
-for (var i = 0; i < 3; i+=1) {
+for (var i = 0; i < 2; i+=1) {
     let isContext = (i === 0);
     brushSpaces.push(new BrushSpace(dispatch, parent, i, isContext));
 }
+brushSpaces.push(new BrushSpaceVega(dispatch, parent, 3, false));
 updating = false;
 
 function change_state(newState) {
