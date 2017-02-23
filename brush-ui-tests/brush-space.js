@@ -34,8 +34,8 @@ class BrushSpace {
             .attr("height", this.container_height)
             .attr("class", "c-svg--"+this.id);
 
-        this.width = +this.svg.attr("width") - this.margin.left - this.margin.right,
-        this.height = +this.svg.attr("height") - this.margin.top - this.margin.bottom;
+        this.width = +this.container_width - this.margin.left - this.margin.right,
+        this.height = +this.container_height - this.margin.top - this.margin.bottom;
 
         this.x = d3.scaleTime().range([0, this.width]),
         this.y = d3.scaleLinear().range([this.height, 0]);
