@@ -77,3 +77,16 @@ this.dispatch.call("brushchange-request", {}, {
     source: "",
     iscontext: false
 });
+
+var globalTimeDomain = d3.scaleTime().domain([new Date(2015, 0, 1), new Date(2016, 6, 1)]);
+var that = this;
+$("#addTime").click(function() {
+    var newDomain = [globalTimeDomain.domain()[0], new Date(globalTimeDomain.domain()[1].getTime()+1000*60*60*24*30)];
+    globalTimeDomain.domain(newDomain);
+    that.dispatch.call("brushchange-request", {}, {
+        range: [0,1],
+        domain: globalTimeDomain.domain(),
+        source: "",
+        iscontext: false
+    });
+});
