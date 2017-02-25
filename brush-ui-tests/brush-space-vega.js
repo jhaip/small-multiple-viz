@@ -15,6 +15,9 @@ class BrushSpaceVega {
         this.dispatch.on("statechange."+this.id, function(e) {
             that.state_change(e);
         });
+        this.dispatch.on("newdata."+this.id, function(e) {
+            that.update_data(e);
+        });
 
         this.margin = {top: 20, right: 20, bottom: 20, left: 20};
         this.container_width = 960;
@@ -22,6 +25,8 @@ class BrushSpaceVega {
 
         this.state = "";
         this.annotationData = [];
+
+        this.data = [{"u": "Jan 1 2015",  "v": 28}, {"u": "Mar 1 2015",  "v": 55}];
 
         this.originalSpec = {
           "$schema": "https://vega.github.io/schema/vega/v3.0.json",
@@ -166,6 +171,8 @@ class BrushSpaceVega {
         this.spec["width"] = this.width;
         this.spec["height"] = this.height;
         this.spec["scales"][0]["domain"] = [this.x.domain()[0].getTime(), this.x.domain()[1].getTime()];
+        this.spec["data"][0]["values"] = JSON.parse(JSON.stringify(this.data));
+        // console.log(this.spec);
         var runtime = vega.parse(this.spec); // may throw an Error if parsing fails
         this.view = new vega.View(runtime)
           .logLevel(vega.Warn) // set view logging level
@@ -205,6 +212,7 @@ class BrushSpaceVega {
         this.spec["width"] = this.width;
         this.spec["height"] = this.height;
         this.spec["scales"][0]["domain"] = [this.x.domain()[0].getTime(), this.x.domain()[1].getTime()];
+        this.spec["data"][0]["values"] = JSON.parse(JSON.stringify(this.data));
         var runtime = vega.parse(this.spec); // may throw an Error if parsing fails
         this.view = new vega.View(runtime)
           .logLevel(vega.Warn) // set view logging level
@@ -319,6 +327,10 @@ class BrushSpaceVega {
         this.x.domain(newDomain);
         this.update_scene();
         this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
+    }
+    update_data(e) {
+        this.data = JSON.parse(JSON.stringify(e.data));
+        this.update_scene();
     }
     brush_change(e) {
         if (this.id !== e.source) {

@@ -1,4 +1,9 @@
-var dispatch = d3.dispatch("brushchange", "brushchange-request", "hoverchange", "statechange");
+var dispatch = d3.dispatch("brushchange",
+                           "brushchange-request",
+                           "hoverchange",
+                           "statechange",
+                           "fetchdata",
+                           "newdata");
 var parent = d3.select(".visual-block");
 var updating = true;
 var update_count = 0;
@@ -19,9 +24,12 @@ dispatch.on("brushchange-request", function(e) {
     if (updating === false) {
         updating = true;
         dispatch.call("brushchange", {}, e);
+        dispatch.call("fetchdata", {}, e);
         updating = false;
     }
 });
+
+var dm = new DataModule(dispatch);
 
 for (var i = 0; i < 2; i+=1) {
     let isContext = (i === 0);
