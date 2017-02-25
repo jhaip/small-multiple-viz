@@ -4,7 +4,7 @@ var dispatch = d3.dispatch("brushchange",
                            "statechange",
                            "fetchdata",
                            "newdata");
-var parent = d3.select(".visual-block");
+// var parent = d3.select(".visual-block");  // some weird bug that messes up gapi
 var updating = true;
 var update_count = 0;
 var brushSpaces = [];
@@ -29,13 +29,11 @@ dispatch.on("brushchange-request", function(e) {
     }
 });
 
-var dm = new DataModule(dispatch);
-
 for (var i = 0; i < 2; i+=1) {
     let isContext = (i === 0);
-    brushSpaces.push(new BrushSpace(dispatch, parent, i, isContext));
+    brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), i, isContext));
 }
-brushSpaces.push(new BrushSpaceVega(dispatch, parent, 3, false));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 3, false));
 updating = false;
 
 function change_state(newState) {
@@ -71,22 +69,39 @@ d3.select("body").on("keydown", function() {
     }
 });
 
-this.dispatch.call("brushchange-request", {}, {
-    range: [0,1],
-    domain: [new Date(2015, 0, 1), new Date(2016, 6, 1)],
-    source: "",
-    iscontext: false
-});
-
-var globalTimeDomain = d3.scaleTime().domain([new Date(2015, 0, 1), new Date(2016, 6, 1)]);
+var globalTimeDomain = d3.scaleTime().domain([new Date(2017, 0, 25), new Date(2017, 1, 1)]);
 var that = this;
-$("#addTime").click(function() {
-    var newDomain = [globalTimeDomain.domain()[0], new Date(globalTimeDomain.domain()[1].getTime()+1000*60*60*24*30)];
-    globalTimeDomain.domain(newDomain);
-    that.dispatch.call("brushchange-request", {}, {
+
+function dispatch_global_domain() {
+    this.dispatch.call("brushchange-request", {}, {
         range: [0,1],
         domain: globalTimeDomain.domain(),
         source: "",
         iscontext: false
     });
+}
+
+$("#addTime").click(function() {
+    var newDomain = [globalTimeDomain.domain()[0], new Date(globalTimeDomain.domain()[1].getTime()+1000*60*60*24*30)];
+    globalTimeDomain.domain(newDomain);
+    dispatch_global_domain();
 });
+
+(function(gapi) {
+    function start() {
+      // 2. Initialize the JavaScript client library.
+      gapi.client.init({
+        'apiKey': 'AIzaSyD1qRhXFoSvC8Wj0oZ_Ww5WLJxptt-HTgE',
+        'discoveryDocs': ['https://datastore.googleapis.com/$discovery/rest?version=v1'],
+        // clientId and scope are optional if auth is not required.
+        'clientId': '378739939891-k9hivlpuamla964gs2hpbu52ckpgocp0.apps.googleusercontent.com',
+        'scope': 'https://www.googleapis.com/auth/datastore',
+      }).then(function() {
+          console.log("Google Ready!");
+          var dmFake = new DataModule(dispatch, "fake");
+          var dm = new DataModule(dispatch, "ParticleEvent");
+          dispatch_global_domain();
+      });
+    }
+    gapi.load('client', start);
+})(gapi);

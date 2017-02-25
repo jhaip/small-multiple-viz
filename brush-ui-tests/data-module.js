@@ -1,7 +1,58 @@
+var startAndEndQuery = {
+  "query":
+  {
+    "kind":
+    [
+      {
+        "name": "ParticleEvent"
+      }
+    ],
+    "filter":
+    {
+      "compositeFilter":
+      {
+        "filters":
+        [
+          {
+            "propertyFilter":
+            {
+              "property":
+              {
+                "name": "published_at"
+              },
+              "op": "LESS_THAN",
+              "value":
+              {
+                "timestampValue": "2017-01-29T19:10:34.372999Z"
+              }
+            }
+          },
+          {
+            "propertyFilter":
+            {
+              "property":
+              {
+                "name": "published_at"
+              },
+              "value":
+              {
+                "timestampValue": "2017-01-29T19:07:51.476999Z"
+              },
+              "op": "GREATER_THAN"
+            }
+          }
+        ],
+        "op": "AND"
+      }
+    }
+  }
+};
+
 class DataModule {
-    constructor(dispatch) {
+    constructor(dispatch, source) {
         this.dispatch = dispatch;
         this.data = [];
+        this.source = source;
         this.scale = d3.scaleTime();
 
         var that = this;
@@ -12,18 +63,47 @@ class DataModule {
     }
     fetch_data(e) {
         var that = this;
-        setTimeout(function() {
-            that.data = [
-                {"u": "Jan 1 2015",  "v": 28},
-                {"u": "Mar 1 2015",  "v": 55},
-                {"u": "May 1 2015",  "v": 28},
-                {"u": "Jul 1 2015",  "v": 91},
-                {"u": "Aug 1 2015",  "v": 28},
-                {"u": "Jan 1 2016",  "v": 53}
-            ];
-            that.scale.domain(e.domain);
-            that.get_data(e);
-        }, 1000);
+        if (this.source === "fake") {
+            setTimeout(function() {
+                that.data = [
+                    {"u": "Jan 1 2015",  "v": 28},
+                    {"u": "Mar 1 2015",  "v": 55},
+                    {"u": "May 1 2015",  "v": 28},
+                    {"u": "Jul 1 2015",  "v": 91},
+                    {"u": "Aug 1 2015",  "v": 28},
+                    {"u": "Jan 1 2016",  "v": 53}
+                ];
+                that.scale.domain(e.domain);
+                that.get_data(e);
+            }, 1000);
+        } else if (this.source === "ParticleEvent") {
+            let fetchData = startAndEndQuery;
+            fetchData.query.filter.compositeFilter.filters[0].propertyFilter.value.timestampValue = e.domain[1].toISOString();
+            fetchData.query.filter.compositeFilter.filters[1].propertyFilter.value.timestampValue = e.domain[0].toISOString();
+
+            gapi.client.datastore.projects.runQuery({
+                projectId: 'photon-data-collection',
+                query: fetchData.query
+            }).then(function(response) {
+                const data = response.result;
+                that.data = [];
+
+                if (data.batch.entityResults) {
+                    const nTests = data.batch.entityResults.length;
+                    for (let x of data.batch.entityResults) {
+                        if (x.entity.properties.data.stringValue !== "START") {
+                            var t = new Date(x.entity.properties.published_at.timestampValue);
+                            t = d3.isoFormat(t);
+                            that.data.push({"u": t, "v": parseInt(x.entity.properties.data.integerValue)});
+                        }
+                    }
+                    that.scale.domain(e.domain);
+                    that.get_data(e);
+                } else {
+                    console.log("no data");
+                }
+            });
+        }
     }
     get_data(e) {
         if (this.data.length === 0 || e.domain[0] < this.scale.domain()[0] || e.domain[1] > this.scale.domain()[1]) {
