@@ -26,7 +26,7 @@ class BrushSpaceVega {
         this.state = "";
         this.annotationData = [];
 
-        this.data = [{"u": "Jan 1 2015",  "v": 28}, {"u": "Mar 1 2015",  "v": 55}];
+        this.data = [];
 
         this.originalSpec = {
           "$schema": "https://vega.github.io/schema/vega/v3.0.json",
@@ -156,8 +156,6 @@ class BrushSpaceVega {
         }
 
         this.context.select(".brush .overlay")
-            // .on("mouseover", function() { focus.style("display", null); })
-            // .on("mouseout", function() { focus.style("display", "none"); })
             .on("mousemove", function() {
                 var x0 = that.x.invert(d3.mouse(this)[0]);
                 that.dispatch.call("hoverchange", {}, x0);
@@ -167,18 +165,20 @@ class BrushSpaceVega {
             that.clicked(d3.mouse(this));
         });
 
-        this.spec = $.extend(true, {}, this.originalSpec);
-        this.spec["width"] = this.width;
-        this.spec["height"] = this.height;
-        this.spec["scales"][0]["domain"] = [this.x.domain()[0].getTime(), this.x.domain()[1].getTime()];
-        this.spec["data"][0]["values"] = JSON.parse(JSON.stringify(this.data));
-        // console.log(this.spec);
-        var runtime = vega.parse(this.spec); // may throw an Error if parsing fails
-        this.view = new vega.View(runtime)
-          .logLevel(vega.Warn) // set view logging level
-          .initialize(this.vis_el.node()) // set parent DOM element
-          .renderer('svg') // set render type (defaults to 'canvas')
-          .run(); // update and render the view
+        if (this.data.length > 0) {
+            this.spec = $.extend(true, {}, this.originalSpec);
+            this.spec["width"] = this.width;
+            this.spec["height"] = this.height;
+            this.spec["scales"][0]["domain"] = [this.x.domain()[0].getTime(), this.x.domain()[1].getTime()];
+            this.spec["data"][0]["values"] = JSON.parse(JSON.stringify(this.data));
+            // console.log(this.spec);
+            var runtime = vega.parse(this.spec); // may throw an Error if parsing fails
+            this.view = new vega.View(runtime)
+              .logLevel(vega.Warn) // set view logging level
+              .initialize(this.vis_el.node()) // set parent DOM element
+              .renderer('svg') // set render type (defaults to 'canvas')
+              .run(); // update and render the view
+        }
     }
     update_scene() {
         var that = this;
@@ -206,19 +206,23 @@ class BrushSpaceVega {
         this.update_annotations();
 
         // update viz
-        this.view.finalize(); // "Prepares the view to be removed from a web page." - Vega docs
+        if (this.view) {
+            this.view.finalize(); // "Prepares the view to be removed from a web page." - Vega docs
+        }
         this.vis_el.html("");
-        this.spec = $.extend(true, {}, this.originalSpec);
-        this.spec["width"] = this.width;
-        this.spec["height"] = this.height;
-        this.spec["scales"][0]["domain"] = [this.x.domain()[0].getTime(), this.x.domain()[1].getTime()];
-        this.spec["data"][0]["values"] = JSON.parse(JSON.stringify(this.data));
-        var runtime = vega.parse(this.spec); // may throw an Error if parsing fails
-        this.view = new vega.View(runtime)
-          .logLevel(vega.Warn) // set view logging level
-          .initialize(this.vis_el.node()) // set parent DOM element
-          .renderer('svg') // set render type (defaults to 'canvas')
-          .run(); // update and render the view
+        if (this.data.length > 0) {
+            this.spec = $.extend(true, {}, this.originalSpec);
+            this.spec["width"] = this.width;
+            this.spec["height"] = this.height;
+            this.spec["scales"][0]["domain"] = [this.x.domain()[0].getTime(), this.x.domain()[1].getTime()];
+            this.spec["data"][0]["values"] = JSON.parse(JSON.stringify(this.data));
+            var runtime = vega.parse(this.spec); // may throw an Error if parsing fails
+            this.view = new vega.View(runtime)
+              .logLevel(vega.Warn) // set view logging level
+              .initialize(this.vis_el.node()) // set parent DOM element
+              .renderer('svg') // set render type (defaults to 'canvas')
+              .run(); // update and render the view
+        }
     }
     update_annotations() {
         var that = this;
@@ -334,7 +338,7 @@ class BrushSpaceVega {
     }
     brush_change(e) {
         if (this.id !== e.source) {
-            if (this.isContext) {
+            if (this.isContext && e.domain[0] >= this.x.domain()[0] && e.domain[1] <= this.x.domain()[1]) {
                 var r = e.domain.map(this.x, this.x.invert);
                 this.brush.move(this.context.select(".brush"), r);
             } else {

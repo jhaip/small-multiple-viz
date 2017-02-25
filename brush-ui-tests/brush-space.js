@@ -40,7 +40,7 @@ class BrushSpace {
         this.x = d3.scaleTime().range([0, this.width]),
         this.y = d3.scaleLinear().range([this.height, 0]);
 
-        this.xAxis = d3.axisBottom(this.x),
+        this.xAxis = d3.axisBottom(this.x);
         this.yAxis = d3.axisLeft(this.y);
 
         this.brush = d3.brushX()
@@ -108,8 +108,6 @@ class BrushSpace {
         }
 
         this.context.select(".brush .overlay")
-            // .on("mouseover", function() { focus.style("display", null); })
-            // .on("mouseout", function() { focus.style("display", "none"); })
             .on("mousemove", function() {
                 var x0 = that.x.invert(d3.mouse(this)[0]);
                 that.dispatch.call("hoverchange", {}, x0);
@@ -269,7 +267,7 @@ class BrushSpace {
     }
     brush_change(e) {
         if (this.id !== e.source) {
-            if (this.isContext) {
+            if (this.isContext && e.domain[0] >= this.x.domain()[0] && e.domain[1] <= this.x.domain()[1]) {
                 var r = e.domain.map(this.x, this.x.invert);
                 this.brush.move(this.context.select(".brush"), r);
             } else {

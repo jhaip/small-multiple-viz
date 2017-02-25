@@ -70,3 +70,10 @@ d3.select("body").on("keydown", function() {
         }
     }
 });
+
+this.dispatch.call("brushchange-request", {}, {
+    range: [0,1],
+    domain: [new Date(2015, 0, 1), new Date(2016, 6, 1)],
+    source: "",
+    iscontext: false
+});
