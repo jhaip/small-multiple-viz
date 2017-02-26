@@ -99,7 +99,7 @@ $("#addTime").click(function() {
       }).then(function() {
           console.log("Google Ready!");
           var dmFake = new DataModule(dispatch, "fake");
-          var dm = new DataModule(dispatch, "ParticleEvent");
+          var dm = new DataModuleGoogleDatastore(dispatch, "ParticleEvent");
           dispatch_global_domain();
       });
     }

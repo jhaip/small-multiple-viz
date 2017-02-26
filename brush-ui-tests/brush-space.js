@@ -15,33 +15,57 @@ class BrushSpace {
         this.dispatch.on("statechange."+this.id, function(e) {
             that.state_change(e);
         });
+        this.dispatch.on("newdata."+this.id, function(e) {
+            that.update_data(e);
+        });
 
         this.margin = {top: 20, right: 20, bottom: 20, left: 20};
         this.container_width = 960;
         this.container_height = 150;
 
-        this.svg = this.parent.append("svg");
-
         this.state = "";
         this.annotationData = [];
 
+        this.data = [];
+
         this.create_scene();
+    }
+    create_axes() {
+        this.xAxis = d3.axisBottom(this.x);
+        this.yAxis = d3.axisLeft(this.y);
+
+        this.context.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + this.height + ")")
+            .call(this.xAxis);
+
+        this.context.append("g")
+            .attr("class", "axis axis--y")
+            .call(this.yAxis);
+    }
+    update_axes() {
+        this.context.select(".axis--x")
+            .attr("transform", "translate(0," + this.height + ")")
+            .call(this.xAxis);
+        this.context.select(".axis--y")
+            .call(this.yAxis);
     }
     create_scene() {
         var that = this;
 
-        this.svg.attr("width", this.container_width)
-            .attr("height", this.container_height)
-            .attr("class", "c-svg--"+this.id);
+        this.el = this.parent.append("div")
+            .attr("class", "bs-el bs-el--"+this.id)
+            .style("width", this.container_width+"px")
+            .style("height", this.container_height+"px");
+        this.vis_el = this.el.append("div").attr("class", "bs-el-vis--"+this.id);
 
-        this.width = +this.container_width - this.margin.left - this.margin.right,
-        this.height = +this.container_height - this.margin.top - this.margin.bottom;
+        this.svg = this.el.append("svg").attr("class", "cover");
+
+        this.width = this.container_width - this.margin.left - this.margin.right,
+        this.height = this.container_height - this.margin.top - this.margin.bottom;
 
         this.x = d3.scaleTime().range([0, this.width]),
         this.y = d3.scaleLinear().range([this.height, 0]);
-
-        this.xAxis = d3.axisBottom(this.x);
-        this.yAxis = d3.axisLeft(this.y);
 
         this.brush = d3.brushX()
             .extent([[0, 0], [this.width, this.height]]);
@@ -59,14 +83,7 @@ class BrushSpace {
             .attr("class", "context")
             .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-        this.context.append("g")
-            .attr("class", "axis axis--x")
-            .attr("transform", "translate(0," + this.height + ")")
-            .call(this.xAxis);
-
-        this.context.append("g")
-            .attr("class", "axis axis--y")
-            .call(this.yAxis);
+        this.create_axes();
 
         this.focus = this.context.append("line")
             .attr("x1", 0)
@@ -93,12 +110,8 @@ class BrushSpace {
         this.overlay.selectAll(".annotation")
             .data(this.annotationData);
 
-        var svgOffset = $(".c-svg--"+this.id).offset();
-        this.htmlOverlayContainer = this.parent.append("div")
-            .attr("class", "html-overlay-container")
-            .style("position", "absolute")
-            .style("top", svgOffset.top+this.margin.left+"px")
-            .style("left", svgOffset.left+this.margin.top+"px");
+        this.htmlOverlayContainer = this.el.append("div")
+            .attr("class", "html-overlay-container cover-position");
 
         this.x.domain([new Date(2015, 0, 1), new Date(2016, 0, 1)]);
         this.y.domain([0, 1]);
@@ -120,23 +133,18 @@ class BrushSpace {
     update_scene() {
         var that = this;
 
-        this.svg.attr("width", this.container_width)
-            .attr("height", this.container_height);
+        this.el.style("width", this.container_width+"px")
+            .style("height", this.container_height+"px");
 
-        this.width = +this.svg.attr("width") - this.margin.left - this.margin.right,
-        this.height = +this.svg.attr("height") - this.margin.top - this.margin.bottom;
+        this.width = this.container_width - this.margin.left - this.margin.right,
+        this.height = this.container_height - this.margin.top - this.margin.bottom;
 
         this.x.range([0, this.width]),
         this.y.range([this.height, 0]);
 
         this.brush.extent([[0, 0], [this.width, this.height]]);
 
-        this.context.select(".axis--x")
-            .attr("transform", "translate(0," + this.height + ")")
-            .call(this.xAxis);
-
-        this.context.select(".axis--y")
-            .call(this.yAxis);
+        this.update_axes();
 
         this.focus.attr("y2", this.height);
 
@@ -186,9 +194,6 @@ class BrushSpace {
         this.container_width = width;
         this.container_height = height;
 
-        // this.svg.selectAll("*").remove();
-        // this.create_scene();
-
         // save the previous Brush selection
         var brushSelectionRange = d3.brushSelection(this.context.select(".brush").node());
         var brushSelectionDomain = undefined;
@@ -224,11 +229,6 @@ class BrushSpace {
             .style("top", that.y(y)+"px");
         $(".active-annotation--"+annotationId).focus();
         change_state("post-annotation");
-
-        // this.annotationData.push({id: annotationId, x: x, y: y, text: "test"});
-        // this.update_annotations();
-        // change_state("post-annotation");
-        // $(".annotation--"+annotationId).focus();
     }
     state_change(e) {
         this.state = e.state;
@@ -264,6 +264,10 @@ class BrushSpace {
         this.x.domain(newDomain);
         this.update_scene();
         this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
+    }
+    update_data(e) {
+        this.data = JSON.parse(JSON.stringify(e.data));
+        this.update_scene();
     }
     brush_change(e) {
         if (this.id !== e.source) {
