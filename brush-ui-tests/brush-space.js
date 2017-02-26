@@ -1,5 +1,5 @@
 class BrushSpace {
-    constructor(dispatch, parent, id, source, isContext = false) {
+    constructor(dispatch, parent, width, height, id, source, isContext = false) {
         this.dispatch = dispatch;
         this.id = id;
         this.source = source;
@@ -23,8 +23,8 @@ class BrushSpace {
         }
 
         this.margin = {top: 20, right: 20, bottom: 20, left: 20};
-        this.container_width = 960;
-        this.container_height = 150;
+        this.container_width = width;
+        this.container_height = height;
 
         this.state = "";
         this.annotationData = [];

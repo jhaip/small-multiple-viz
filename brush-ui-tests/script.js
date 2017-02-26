@@ -32,10 +32,12 @@ dispatch.on("brushchange-request", function(e) {
     }
 });
 
-brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 0, undefined, true));
-brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 1, undefined, false));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 2, "fake", false));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 3, "ParticleEvent", false));
+// brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 0, undefined, true));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 100, 0, "fake", true, vegaSpec__NoYDots));
+brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 1, undefined, false));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 50, 2, "fake", false, vegaSpec__NoYDots));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 150, 3, "fake", false, vegaSpec__Area));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 150, 4, "ParticleEvent", false, vegaSpec__Area));
 updating = false;
 
 function change_state(newState) {
