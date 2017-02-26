@@ -1,7 +1,8 @@
 class BrushSpace {
-    constructor(dispatch, parent, id, isContext = false) {
+    constructor(dispatch, parent, id, source, isContext = false) {
         this.dispatch = dispatch;
         this.id = id;
+        this.source = source;
         this.isContext = isContext;
         this.parent = parent;
         var that = this;
@@ -15,9 +16,11 @@ class BrushSpace {
         this.dispatch.on("statechange."+this.id, function(e) {
             that.state_change(e);
         });
-        this.dispatch.on("newdata."+this.id, function(e) {
-            that.update_data(e);
-        });
+        if (this.source !== undefined) {
+            this.dispatch.on("newdata--"+this.source+"."+this.id, function(e) {
+                that.update_data(e);
+            });
+        }
 
         this.margin = {top: 20, right: 20, bottom: 20, left: 20};
         this.container_width = 960;

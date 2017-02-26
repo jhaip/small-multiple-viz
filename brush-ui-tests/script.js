@@ -2,8 +2,10 @@ var dispatch = d3.dispatch("brushchange",
                            "brushchange-request",
                            "hoverchange",
                            "statechange",
-                           "fetchdata",
-                           "newdata");
+                           "fetchdata--fake",
+                           "fetchdata--ParticleEvent",
+                           "newdata--fake",
+                           "newdata--ParticleEvent");
 // var parent = d3.select(".visual-block");  // some weird bug that messes up gapi
 var updating = true;
 var update_count = 0;
@@ -24,16 +26,16 @@ dispatch.on("brushchange-request", function(e) {
     if (updating === false) {
         updating = true;
         dispatch.call("brushchange", {}, e);
-        dispatch.call("fetchdata", {}, e);
+        dispatch.call("fetchdata--fake", {}, e);
+        dispatch.call("fetchdata--ParticleEvent", {}, e);
         updating = false;
     }
 });
 
-for (var i = 0; i < 2; i+=1) {
-    let isContext = (i === 0);
-    brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), i, isContext));
-}
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 3, false));
+brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 0, undefined, true));
+brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 1, undefined, false));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 2, "fake", false));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 3, "ParticleEvent", false));
 updating = false;
 
 function change_state(newState) {

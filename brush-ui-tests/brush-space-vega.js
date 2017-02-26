@@ -1,6 +1,6 @@
 class BrushSpaceVega extends BrushSpace {
-    constructor(dispatch, parent, id, isContext = false) {
-        super(dispatch, parent, id, isContext);
+    constructor(dispatch, parent, id, source, isContext = false) {
+        super(dispatch, parent, id, source, isContext);
 
         this.originalSpec = {
           "$schema": "https://vega.github.io/schema/vega/v3.0.json",

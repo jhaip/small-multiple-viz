@@ -7,24 +7,21 @@ class DataModule {
 
         var that = this;
 
-        this.dispatch.on("fetchdata", function(e) {
+        this.dispatch.on("fetchdata--"+this.source, function(e) {
             that.get_data(e);
         });
     }
     fetch_data(e) {
         var that = this;
-        // setTimeout(function() {
-            that.data = [
-                {"u": "Jan 1 2015",  "v": 28},
-                {"u": "Mar 1 2015",  "v": 55},
-                {"u": "May 1 2015",  "v": 28},
-                {"u": "Jul 1 2015",  "v": 91},
-                {"u": "Aug 1 2015",  "v": 28},
-                {"u": "Jan 1 2016",  "v": 53}
-            ];
-            that.scale.domain(e.domain);
-            that.get_data(e);
-        // }, 1000);
+        that.data = [
+            {"u": "Jan 26 2017",  "v": 91},
+            {"u": "Jan 30 2017",  "v": 28},
+            {"u": "Jan 31 2017",  "v": 55},
+            {"u": "Feb 1 2017",  "v": 28},
+            {"u": "Feb 2 2017",  "v": 91}
+        ];
+        that.scale.domain(e.domain);
+        that.get_data(e);
     }
     get_data(e) {
         if (this.data.length === 0 || e.domain[0] < this.scale.domain()[0] || e.domain[1] > this.scale.domain()[1]) {
@@ -56,7 +53,7 @@ class DataModule {
             dataInDomain = this.data.slice(startIndex, endIndex+1);
         }
 
-        this.dispatch.call("newdata", {}, {
+        this.dispatch.call("newdata--"+this.source, {}, {
             data: dataInDomain
         });
     }
