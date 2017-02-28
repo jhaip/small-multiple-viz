@@ -1,4 +1,4 @@
-var vegaSpec__NoYDotsText = {
+var vegaSpec__NoYDots = {
   "$schema": "https://vega.github.io/schema/vega/v3.0.json",
   "width": 300,
   "height": 1,
@@ -47,18 +47,6 @@ var vegaSpec__NoYDotsText = {
           "x": {"scale": "xscale", "field": "u"},
           "y": {"scale": "yscale", "value": 0},
           "fill": {"value": "steelblue"}
-        }
-      }
-    },
-    {
-      "type": "text",
-      "from": {"data": "table"},
-      "encode": {
-        "enter": {
-          "x": {"scale": "xscale", "field": "u"},
-          "y": {"scale": "yscale", "value": 0},
-          "fill": {"value": "steelblue"},
-          "text": {"field": "label"}
         }
       }
     }

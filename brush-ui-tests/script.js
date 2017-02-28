@@ -5,9 +5,11 @@ var dispatch = d3.dispatch("brushchange",
                            "fetchdata--fake",
                            "fetchdata--ParticleEvent",
                            "fetchdata--GithubCommits",
+                           "fetchdata--Annotation",
                            "newdata--fake",
                            "newdata--ParticleEvent",
-                           "newdata--GithubCommits");
+                           "newdata--GithubCommits",
+                           "newdata--Annotation");
 // var parent = d3.select(".visual-block");  // some weird bug that messes up gapi
 var updating = true;
 var update_count = 0;
@@ -31,6 +33,7 @@ dispatch.on("brushchange-request", function(e) {
         dispatch.call("fetchdata--fake", {}, e);
         dispatch.call("fetchdata--ParticleEvent", {}, e);
         dispatch.call("fetchdata--GithubCommits", {}, e);
+        dispatch.call("fetchdata--Annotation", {}, e);
         updating = false;
     }
 });
@@ -41,7 +44,8 @@ brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 
 brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 50, 2, "fake", false, vegaSpec__NoYDots));
 brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 150, 3, "fake", false, vegaSpec__Area));
 brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 150, 4, "ParticleEvent", false, vegaSpec__Area));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 50, 5, "GithubCommits", false, vegaSpec__NoYDots));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 100, 5, "GithubCommits", false, vegaSpec__NoYDotsText));
+brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 100, 6, "Annotation", false, vegaSpec__NoYDotsText));
 updating = false;
 
 function change_state(newState) {
@@ -109,6 +113,7 @@ $("#addTime").click(function() {
           var dmFake = new DataModule(dispatch, "fake");
           var dm = new DataModuleGoogleDatastore(dispatch, "ParticleEvent");
           var dmGithub = new DataModuleGithubCommits(dispatch, "GithubCommits");
+          var dmAnnotations = new DataModuleGoogleDatastoreAnnotations(dispatch, "Annotation");
           dispatch_global_domain();
       });
     }

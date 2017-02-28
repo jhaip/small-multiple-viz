@@ -16,7 +16,9 @@ class DataModuleGithubCommits extends DataModule {
             that.data = [];
             var parseTime = d3.timeParse("%Y-%m-%dT%H:%M:%SZ");
             commits.forEach(function(c) {
-                that.data.push({"u": parseTime(c.commit.author.date), "v": 0});
+                that.data.push({"u": parseTime(c.commit.author.date),
+                                "v": 0,
+                                "label": c.commit.message});
             });
             that.scale.domain(e.domain);
             that.get_data(e);
