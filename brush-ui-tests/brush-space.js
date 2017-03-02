@@ -248,6 +248,14 @@ class BrushSpace {
                 this.queuedAnnotation.text = $activeAnnotation.val();
                 this.annotationData.push(this.queuedAnnotation);
                 this.update_annotations();
+                this.dispatch.call("savedata--Annotation", {}, {
+                    guid: this.queuedAnnotation.id,
+                    timestamp: this.queuedAnnotation.x,
+                    text: this.queuedAnnotation.text,
+                    y: this.queuedAnnotation.y,
+                    source: this.source,
+                    id: this.id
+                });
                 $activeAnnotation.remove();
                 this.queuedAnnotation = undefined;
             }

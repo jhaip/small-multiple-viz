@@ -9,7 +9,8 @@ var dispatch = d3.dispatch("brushchange",
                            "newdata--fake",
                            "newdata--ParticleEvent",
                            "newdata--GithubCommits",
-                           "newdata--Annotation");
+                           "newdata--Annotation",
+                           "savedata--Annotation");
 // var parent = d3.select(".visual-block");  // some weird bug that messes up gapi
 var updating = true;
 var update_count = 0;

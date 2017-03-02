@@ -38,6 +38,14 @@ var startAndEndQuery_Annotations = {
 };
 
 class DataModuleGoogleDatastoreAnnotations extends DataModule {
+    constructor(dispatch, source) {
+        super(dispatch, source);
+
+        var that = this;
+        this.dispatch.on("savedata--"+this.source, function(e) {
+            that.save_data(e);
+        });
+    }
     fetch_data(e) {
         var that = this;
         let fetchData = startAndEndQuery_Annotations;
@@ -64,6 +72,66 @@ class DataModuleGoogleDatastoreAnnotations extends DataModule {
             } else {
                 console.log("no data");
             }
+        });
+    }
+    beginTransaction(success_callback) {
+        gapi.client.datastore.projects.beginTransaction({
+            projectId: 'photon-data-collection'
+        }).then(function(response) {
+            console.log(response.result);
+            if (response.result.transaction) {
+                success_callback(response.result.transaction);
+            }
+        }, function(reason) {
+            console.log('Error: ' + reason.result.error.message);
+        });
+    }
+    commitTransaction(transaction_id, mutations, success_callback) {
+        gapi.client.datastore.projects.commit({
+            projectId: 'photon-data-collection',
+            transaction: transaction_id,
+            mutations: mutations
+        }).then(function(response) {
+            success_callback(response.result);
+        }, function(reason) {
+            console.log('Error: ' + reason.result.error.message);
+        });
+    }
+    save_data(e) {
+        var mutations = [{
+            "insert": {
+                "key": {
+                    "partitionId": {
+                        "projectId": "photon-data-collection"
+                    },
+                    "path": [
+                        {
+                            "kind": "Annotation"
+                        }
+                    ]
+                },
+                "properties": {
+                    "type": {
+                        "stringValue": "markdown"
+                    },
+                    "value": {
+                        "stringValue": "# Hello World"
+                    },
+                    "timestamp": {
+                        "timestampValue": "2017-01-29T16:50:29.698Z"
+                    }
+                }
+            }
+        }];
+        mutations[0].insert.properties.timestamp.timestampValue = e.timestamp.toISOString();
+        mutations[0].insert.properties.value.stringValue = e.text;
+
+        var that = this;
+        that.beginTransaction(function(transaction_id) {
+            that.commitTransaction(transaction_id, mutations, function(result) {
+                console.log(result);
+                console.log("not refetching data because it is cached locally");
+            });
         });
     }
 }
