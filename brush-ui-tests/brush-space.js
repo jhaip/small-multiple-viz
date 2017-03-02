@@ -132,6 +132,34 @@ class BrushSpace {
         this.overlay.on("click", function() {
             that.clicked(d3.mouse(this));
         });
+
+        that.create_resize_control();
+    }
+    create_resize_control() {
+        var that = this;
+        var startY = 0;
+
+        function dragstarted(d) {
+            startY = d3.event.y;
+            d3.select(this).raise().classed("active", true);
+        }
+
+        function dragged(d) {
+            d3.select(".bs-el--"+that.id).style("height", (that.container_height+d3.event.y-startY)+"px");
+        }
+
+        function dragended(d) {
+            d3.select(this).classed("active", false);
+            that.resize(that.container_width, that.container_height+d3.event.y-startY);
+        }
+
+        this.el.append("div")
+            .attr("class", "bs-el-resize bs-el-resize--"+this.id)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended)
+            );
     }
     update_scene() {
         var that = this;
