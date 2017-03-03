@@ -2,14 +2,6 @@ var dispatch = d3.dispatch("brushchange",
                            "brushchange-request",
                            "hoverchange",
                            "statechange",
-                           "fetchdata--fake",
-                           "fetchdata--ParticleEvent",
-                           "fetchdata--GithubCommits",
-                           "fetchdata--Annotation",
-                           "newdata--fake",
-                           "newdata--ParticleEvent",
-                           "newdata--GithubCommits",
-                           "newdata--Annotation",
                            "savedata--Annotation");
 // var parent = d3.select(".visual-block");  // some weird bug that messes up gapi
 var updating = true;
@@ -31,23 +23,9 @@ dispatch.on("brushchange-request", function(e) {
     if (updating === false) {
         updating = true;
         dispatch.call("brushchange", {}, e);
-        dispatch.call("fetchdata--fake", {}, e);
-        dispatch.call("fetchdata--ParticleEvent", {}, e);
-        dispatch.call("fetchdata--GithubCommits", {}, e);
-        dispatch.call("fetchdata--Annotation", {}, e);
         updating = false;
     }
 });
-
-// brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 0, undefined, true));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 100, 0, "fake", true, vegaSpec__NoYDots));
-brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 1, undefined, false));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 50, 2, "fake", false, vegaSpec__NoYDots));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 150, 3, "fake", false, vegaSpec__Area));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 150, 4, "ParticleEvent", false, vegaSpec__Area));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 100, 5, "GithubCommits", false, vegaSpec__NoYDotsText));
-brushSpaces.push(new BrushSpaceVega(dispatch, d3.select(".visual-block"), 960, 100, 6, "Annotation", false, vegaSpec__NoYDotsText));
-updating = false;
 
 function change_state(newState) {
     state = newState;
@@ -100,6 +78,18 @@ $("#addTime").click(function() {
     dispatch_global_domain();
 });
 
+function createBrushSpaces(dmMaster) {
+    // brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 0, undefined, true));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 100, 0, "fake", true, vegaSpec__NoYDots));
+    brushSpaces.push(new BrushSpace(dispatch, dmMaster, d3.select(".visual-block"), 960, 150, 1, undefined, false));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 50, 2, "fake", false, vegaSpec__NoYDots));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 150, 3, "fake", false, vegaSpec__Area));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 150, 4, "ParticleEvent", false, vegaSpec__Area));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 100, 5, "GithubCommits", false, vegaSpec__NoYDotsText));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 100, 6, "Annotation", false, vegaSpec__NoYDotsText));
+    updating = false;
+}
+
 (function(gapi) {
     function start() {
       // 2. Initialize the JavaScript client library.
@@ -111,10 +101,8 @@ $("#addTime").click(function() {
         'scope': 'https://www.googleapis.com/auth/datastore',
       }).then(function() {
           console.log("Google Ready!");
-          var dmFake = new DataModule(dispatch, "fake");
-          var dm = new DataModuleGoogleDatastore(dispatch, "ParticleEvent");
-          var dmGithub = new DataModuleGithubCommits(dispatch, "GithubCommits");
-          var dmAnnotations = new DataModuleGoogleDatastoreAnnotations(dispatch, "Annotation");
+          var dmMaster = new DataModuleMaster(dispatch);
+          createBrushSpaces(dmMaster);
           dispatch_global_domain();
       });
     }

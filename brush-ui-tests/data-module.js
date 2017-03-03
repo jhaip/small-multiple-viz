@@ -7,11 +7,11 @@ class DataModule {
 
         var that = this;
 
-        this.dispatch.on("fetchdata--"+this.source, function(e) {
+        this.dispatch.on("brushchange.datamodule--"+this.source, function(e) {
             that.get_data(e);
         });
     }
-    fetch_data(e) {
+    fetch_data(e, defer) {
         var that = this;
         that.data = [
             {"u": "Jan 26 2017",  "v": 91},
@@ -21,13 +21,16 @@ class DataModule {
             {"u": "Feb 2 2017",  "v": 91}
         ];
         that.scale.domain(e.domain);
-        that.get_data(e);
+        that.get_data(e, defer);
     }
-    get_data(e) {
+    get_data(e, defer) {
+        if (typeof defer === 'undefined') {
+            defer = $.Deferred();
+        }
         if (this.data.length === 0 || e.domain[0] < this.scale.domain()[0] || e.domain[1] > this.scale.domain()[1]) {
             console.log("outside range! should be fetching new data");
-            this.fetch_data(e);
-            return;
+            this.fetch_data(e, defer);
+            return defer.promise();
         }
 
         var dataInDomain = [];
@@ -53,8 +56,6 @@ class DataModule {
             dataInDomain = this.data.slice(startIndex, endIndex+1);
         }
 
-        this.dispatch.call("newdata--"+this.source, {}, {
-            data: dataInDomain
-        });
+        return defer.resolve(dataInDomain);
     }
 }

@@ -1,6 +1,7 @@
 class BrushSpace {
-    constructor(dispatch, parent, width, height, id, source, isContext = false) {
+    constructor(dispatch, dmMaster, parent, width, height, id, source, isContext = false) {
         this.dispatch = dispatch;
+        this.dataModuleMaster = dmMaster;
         this.id = id;
         this.source = source;
         this.isContext = isContext;
@@ -16,11 +17,6 @@ class BrushSpace {
         this.dispatch.on("statechange."+this.id, function(e) {
             that.state_change(e);
         });
-        if (this.source !== undefined) {
-            this.dispatch.on("newdata--"+this.source+"."+this.id, function(e) {
-                that.update_data(e);
-            });
-        }
 
         this.margin = {top: 20, right: 20, bottom: 20, left: 20};
         this.container_width = width;
@@ -303,6 +299,18 @@ class BrushSpace {
         this.x.domain(newDomain);
         this.update_scene();
         this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
+        this.fetch_data();
+    }
+    fetch_data() {
+        var that = this;
+        if (this.source) {
+            this.dataModuleMaster.fetch_data(this.source, this.x.domain()).done(function(data) {
+                that.data = data;
+                that.update_scene();
+            }).fail(function(e) {
+                console.log("Error fetching data from "+this.id+" for source "+this.source);
+            })
+        }
     }
     update_data(e) {
         this.data = JSON.parse(JSON.stringify(e.data));

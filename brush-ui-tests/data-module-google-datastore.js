@@ -49,7 +49,7 @@ var startAndEndQuery = {
 };
 
 class DataModuleGoogleDatastore extends DataModule {
-    fetch_data(e) {
+    fetch_data(e, defer) {
         var that = this;
         let fetchData = startAndEndQuery;
         fetchData.query.filter.compositeFilter.filters[0].propertyFilter.value.timestampValue = e.domain[1].toISOString();
@@ -72,7 +72,7 @@ class DataModuleGoogleDatastore extends DataModule {
                     }
                 }
                 that.scale.domain(e.domain);
-                that.get_data(e);
+                that.get_data(e, defer);
             } else {
                 console.log("no data");
             }

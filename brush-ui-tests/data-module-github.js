@@ -1,5 +1,5 @@
 class DataModuleGithubCommits extends DataModule {
-    fetch_data(e) {
+    fetch_data(e, defer) {
         var that = this;
         $.ajax({
             type: "GET",
@@ -21,7 +21,7 @@ class DataModuleGithubCommits extends DataModule {
                                 "label": c.commit.message});
             });
             that.scale.domain(e.domain);
-            that.get_data(e);
+            that.get_data(e, defer);
         }).fail(function(err) {
             console.error(err);
         });

@@ -1,6 +1,6 @@
 class BrushSpaceVega extends BrushSpace {
-    constructor(dispatch, parent, width, height, id, source, isContext, vegaSpec) {
-        super(dispatch, parent, width, height, id, source, isContext);
+    constructor(dispatch, dmMaster, parent, width, height, id, source, isContext, vegaSpec) {
+        super(dispatch, dmMaster, parent, width, height, id, source, isContext);
 
         this.originalSpec = vegaSpec;
     }
