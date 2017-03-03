@@ -6,7 +6,7 @@ var dispatch = d3.dispatch("brushchange",
 // var parent = d3.select(".visual-block");  // some weird bug that messes up gapi
 var updating = true;
 var update_count = 0;
-var brushSpaces = [];
+var brushSpaceGroups = [];
 var state = "";
 
 function guid() {
@@ -63,31 +63,40 @@ d3.select("body").on("keydown", function() {
 var globalTimeDomain = d3.scaleTime().domain([new Date(2017, 0, 25), new Date(2017, 1, 1)]);
 var that = this;
 
-function dispatch_global_domain() {
+function dispatch_global_domain(groupIndex) {
     this.dispatch.call("brushchange-request", {}, {
         range: [0,1],
         domain: globalTimeDomain.domain(),
         source: "",
-        iscontext: false
+        iscontext: false,
+        groupIndex: groupIndex
     });
 }
 
 $("#addTime").click(function() {
     var newDomain = [globalTimeDomain.domain()[0], new Date(globalTimeDomain.domain()[1].getTime()+1000*60*60*24*30)];
     globalTimeDomain.domain(newDomain);
-    dispatch_global_domain();
+    dispatch_global_domain(0);
 });
 
 function createBrushSpaces(dmMaster) {
+    var groupIndex = brushSpaceGroups.length;
+    d3.select(".visual-blocks")
+        .append("div")
+        .attr("class", "visual-block visual-block--"+groupIndex)
+        .append("h3")
+        .text("Group "+groupIndex);
+    var brushSpaces = [];
     // brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 0, undefined, true));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 100, 0, "fake", true, vegaSpec__NoYDots));
-    brushSpaces.push(new BrushSpace(dispatch, dmMaster, d3.select(".visual-block"), 960, 150, 1, undefined, false));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 50, 2, "fake", false, vegaSpec__NoYDots));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 150, 3, "fake", false, vegaSpec__Area));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 150, 4, "ParticleEvent", false, vegaSpec__Area));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 100, 5, "GithubCommits", false, vegaSpec__NoYDotsText));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, d3.select(".visual-block"), 960, 100, 6, "Annotation", false, vegaSpec__NoYDotsText));
-    updating = false;
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "fake", true, vegaSpec__NoYDots));
+    brushSpaces.push(new BrushSpace(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), undefined, false));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 50, guid(), "fake", false, vegaSpec__NoYDots));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "fake", false, vegaSpec__Area));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "ParticleEvent", false, vegaSpec__Area));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "GithubCommits", false, vegaSpec__NoYDotsText));
+    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "Annotation", false, vegaSpec__NoYDotsText));
+    brushSpaceGroups.push(brushSpaces);
+    // updating = false;
 }
 
 (function(gapi) {
@@ -103,7 +112,10 @@ function createBrushSpaces(dmMaster) {
           console.log("Google Ready!");
           var dmMaster = new DataModuleMaster(dispatch);
           createBrushSpaces(dmMaster);
-          dispatch_global_domain();
+          createBrushSpaces(dmMaster);
+          updating = false;
+          dispatch_global_domain(0);
+          dispatch_global_domain(1);
       });
     }
     gapi.load('client', start);

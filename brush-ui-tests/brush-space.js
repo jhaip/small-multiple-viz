@@ -1,7 +1,8 @@
 class BrushSpace {
-    constructor(dispatch, dmMaster, parent, width, height, id, source, isContext = false) {
+    constructor(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext = false) {
         this.dispatch = dispatch;
         this.dataModuleMaster = dmMaster;
+        this.groupIndex = groupIndex;
         this.id = id;
         this.source = source;
         this.isContext = isContext;
@@ -122,7 +123,10 @@ class BrushSpace {
         this.context.select(".brush .overlay")
             .on("mousemove", function() {
                 var x0 = that.x.invert(d3.mouse(this)[0]);
-                that.dispatch.call("hoverchange", {}, x0);
+                that.dispatch.call("hoverchange", {}, {
+                    x0: x0,
+                    groupIndex: that.groupIndex
+                });
             })
 
         this.overlay.on("click", function() {
@@ -237,9 +241,12 @@ class BrushSpace {
             this.brush.move(this.context.select(".brush"), newBrushSelectionRange);
         }
     }
-    mousemove(x0) {
-        this.focus.attr("x1", this.x(x0))
-            .attr("x2", this.x(x0));
+    mousemove(e) {
+        if (e.groupIndex !== this.groupIndex) {
+            return;
+        }
+        this.focus.attr("x1", this.x(e.x0))
+            .attr("x2", this.x(e.x0));
     }
     clicked(clickPosition) {
         var x = this.x.invert(clickPosition[0]);
@@ -292,7 +299,8 @@ class BrushSpace {
             range: s,
             domain: sDomain,
             source: this.id,
-            iscontext: this.isContext
+            iscontext: this.isContext,
+            groupIndex: this.groupIndex
         });
     }
     update_domain(newDomain) {
@@ -317,6 +325,9 @@ class BrushSpace {
         this.update_scene();
     }
     brush_change(e) {
+        if (e.groupIndex !== this.groupIndex) {
+            return;
+        }
         if (this.id !== e.source) {
             if (this.isContext && e.domain[0] >= this.x.domain()[0] && e.domain[1] <= this.x.domain()[1]) {
                 var r = e.domain.map(this.x, this.x.invert);
