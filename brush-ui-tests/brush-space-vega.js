@@ -10,6 +10,30 @@ class BrushSpaceVega extends BrushSpace {
     update_axes() {
         // Do nothing, Vega handles axes
     }
+    open_config() {
+        $("#editVisualModal_sources-list").val(this.source);
+        $("#editVisualModal_dropdownVisualTypes").val("Vega");
+        $("#editVisualModal_vegaSpec").val(JSON.stringify(this.originalSpec, undefined, 4));
+        $("#editVisualModal_advancedVisualTypeOptions").show(0);
+        $('#editVisualModal').modal('show');
+    }
+    save_config_edits() {
+        this.source = $("#editVisualModal_sources-list").val();
+        $(".bs-el-container-label--"+this.id).text("Source: "+this.source);
+
+        let newVisualType = $("#editVisualModal_dropdownVisualTypes").val();
+        if (newVisualType !== "Vega") {
+            console.log("changing visualization type not handled yet!");
+        }
+
+        this.originalSpec = JSON.parse($("#editVisualModal_vegaSpec").val());
+
+        $('#editVisualModal').modal('hide');
+
+        this.data = [];
+        this.update_scene();
+        this.fetch_data();
+    }
     create_scene() {
         super.create_scene();
 

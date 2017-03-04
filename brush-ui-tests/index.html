@@ -6,6 +6,10 @@
         <style>
             .bs-el {
                 position: relative;
+                overflow: hidden;
+            }
+            .bs-el-container {
+                margin-top: 10px;
             }
             .cover {
                 position: absolute;
@@ -22,9 +26,9 @@
             .bs-el-resize {
                 width: 100%;
                 height: 5px;
-                position: absolute;
+                /*position: absolute;
                 bottom: 0px;
-                left: 0px;
+                left: 0px;*/
                 z-index: 100;
             }
             .bs-el-resize:hover {
@@ -94,6 +98,7 @@
               <label for="dropdownVisualTypes">Visual Type</label>
               <select class="form-control" id="dropdownVisualTypes">
                 <option>Vega</option>
+                <option>Base</option>
               </select>
           </div>
           <div>
@@ -109,6 +114,48 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-primary" id="submitAddVisual">Add Visual</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editVisualModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Edit Visual</h4>
+      </div>
+      <div class="modal-body">
+          <div class="form-group">
+              <label for="sources-list">Data Source</label>
+              <select class="form-control" id="editVisualModal_sources-list">
+                <option>fake</option>
+                <option>ParticleEvent</option>
+                <option>GithubCommits</option>
+                <option>Annotation</option>
+              </select>
+          </div>
+          <div class="form-group">
+              <label for="dropdownVisualTypes">Visual Type</label>
+              <select class="form-control" id="editVisualModal_dropdownVisualTypes">
+                <option>Vega</option>
+                <option>Base</option>
+              </select>
+          </div>
+          <div>
+              <h3>Advanced Options</h3>
+              <div id="editVisualModal_advancedVisualTypeOptions">
+                  <div class="form-group">
+                      <label for="vegaSpec">Vega Specification:</label>
+                      <textarea class="form-control" rows="5" id="editVisualModal_vegaSpec"></textarea>
+                    </div>
+              </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveVisualEdits">Save Edits</button>
       </div>
     </div>
   </div>

@@ -50,10 +50,57 @@ class BrushSpace {
         this.context.select(".axis--y")
             .call(this.yAxis);
     }
+    create_scene_label() {
+        var that = this;
+        this.label_el = this.container_el.append("div")
+            .attr("class", "clearfix")
+            .style("width", "100%");
+        this.label_el.append("span")
+            .attr("class", "bs-el-container-label bs-el-container-label--"+this.id)
+            .style("float", "left")
+            .text("Source: "+this.source);
+        this.label_el.append("span")
+            .style("float", "right")
+            .html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Edit</button>')
+            .on("click", function(e) {
+                $("#saveVisualEdits").off();
+                $("#saveVisualEdits").on("click", function() {
+                    that.save_config_edits();
+                })
+                that.open_config();
+            });
+    }
+    open_config() {
+        $("#editVisualModal_sources-list").val(this.source);
+        $("#editVisualModal_dropdownVisualTypes").val("Base");
+        $("#editVisualModal_vegaSpec").val("");
+        $("#editVisualModal_advancedVisualTypeOptions").hide(0);
+        $('#editVisualModal').modal('show');
+    }
+    save_config_edits() {
+        this.source = $("#editVisualModal_sources-list").val();
+        $(".bs-el-container-label--"+this.id).text("Source: "+this.source);
+
+        let newVisualType = $("#editVisualModal_dropdownVisualTypes").val();
+        if (newVisualType !== "Base") {
+            console.log("changing visualization type not handled yet!");
+        }
+
+        $('#editVisualModal').modal('hide');
+
+        this.data = [];
+        this.update_scene();
+        this.fetch_data();
+    }
     create_scene() {
         var that = this;
 
-        this.el = this.parent.append("div")
+        this.container_el = this.parent.append("div")
+            .attr("class", "bs-el-container bs-el-container--"+this.id);
+
+        this.create_scene_label();
+
+        this.el = this.container_el.append("div")
             .attr("class", "bs-el bs-el--"+this.id)
             .style("width", this.container_width+"px")
             .style("height", this.container_height+"px");
@@ -153,7 +200,7 @@ class BrushSpace {
             that.resize(that.container_width, that.container_height+d3.event.y-startY);
         }
 
-        this.el.append("div")
+        this.container_el.append("div")
             .attr("class", "bs-el-resize bs-el-resize--"+this.id)
             .call(d3.drag()
                 .on("start", dragstarted)
