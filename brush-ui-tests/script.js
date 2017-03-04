@@ -8,6 +8,7 @@ var updating = true;
 var update_count = 0;
 var brushSpaceGroups = [];
 var state = "";
+var dmMaster = undefined;
 
 function guid() {
   function s4() {
@@ -79,6 +80,66 @@ $("#addTime").click(function() {
     dispatch_global_domain(0);
 });
 
+$("#btn-add-group").click(function() {
+    updating = true;
+    createBrushSpaces(dmMaster);
+    updating = false;
+    dispatch_global_domain(brushSpaceGroups.length-1);
+    $("#dropdownAddNewVisualToGroup").append($('<option>', {
+        value: brushSpaceGroups.length-1,
+        text: brushSpaceGroups.length-1
+    }));
+});
+
+$("#vegaSpec").text(JSON.stringify(vegaSpec__Area, undefined, 4));
+$("#submitAddVisual").click(function() {
+    var targetGroup = $("#dropdownAddNewVisualToGroup").val();
+    var dataSource = $("#sources-list").val();
+    var visualType = $("#dropdownVisualTypes").val();
+    var newVegaSpec = JSON.parse($("#vegaSpec").val());
+    console.log(targetGroup);
+    console.log(dataSource);
+    console.log(visualType);
+    console.log(newVegaSpec);
+
+    updating = true;
+    groupsToAddVisualTo = [];
+    if (targetGroup === "All Groups") {
+        for (let i=0; i<brushSpaceGroups.length; i+=1) {
+            brushSpaceGroups[i].push(new BrushSpaceVega(dispatch,
+                                                                  dmMaster,
+                                                                  i,
+                                                                  d3.select(".visual-block--"+i),
+                                                                  500,
+                                                                  150,
+                                                                  guid(),
+                                                                  dataSource,
+                                                                  false,
+                                                                  newVegaSpec));
+        }
+        updating = false;
+        for (let i=0; i<brushSpaceGroups.length; i+=1) {
+            dispatch_global_domain(i);
+        }
+    } else {
+        targetGroup = parseInt(targetGroup);
+        brushSpaceGroups[targetGroup].push(new BrushSpaceVega(dispatch,
+                                                              dmMaster,
+                                                              targetGroup,
+                                                              d3.select(".visual-block--"+targetGroup),
+                                                              500,
+                                                              150,
+                                                              guid(),
+                                                              dataSource,
+                                                              false,
+                                                              newVegaSpec));
+        updating = false;
+        dispatch_global_domain(targetGroup);
+    }
+
+    $('#newVisualModal').modal('hide');
+});
+
 function createBrushSpaces(dmMaster) {
     var groupIndex = brushSpaceGroups.length;
     d3.select(".visual-blocks")
@@ -90,10 +151,10 @@ function createBrushSpaces(dmMaster) {
     // brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 0, undefined, true));
     brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "fake", true, vegaSpec__NoYDots));
     brushSpaces.push(new BrushSpace(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), undefined, false));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 50, guid(), "fake", false, vegaSpec__NoYDots));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "fake", false, vegaSpec__Area));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "ParticleEvent", false, vegaSpec__Area));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "GithubCommits", false, vegaSpec__NoYDotsText));
+    // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 50, guid(), "fake", false, vegaSpec__NoYDots));
+    // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "fake", false, vegaSpec__Area));
+    // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "ParticleEvent", false, vegaSpec__Area));
+    // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "GithubCommits", false, vegaSpec__NoYDotsText));
     brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "Annotation", false, vegaSpec__NoYDotsText));
     brushSpaceGroups.push(brushSpaces);
     // updating = false;
@@ -110,12 +171,12 @@ function createBrushSpaces(dmMaster) {
         'scope': 'https://www.googleapis.com/auth/datastore',
       }).then(function() {
           console.log("Google Ready!");
-          var dmMaster = new DataModuleMaster(dispatch);
+          dmMaster = new DataModuleMaster(dispatch);
           createBrushSpaces(dmMaster);
-          createBrushSpaces(dmMaster);
+          // createBrushSpaces(dmMaster);
           updating = false;
           dispatch_global_domain(0);
-          dispatch_global_domain(1);
+          // dispatch_global_domain(1);
       });
     }
     gapi.load('client', start);
