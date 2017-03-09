@@ -111,7 +111,7 @@ class BrushSpace {
         this.width = this.container_width - this.margin.left - this.margin.right,
         this.height = this.container_height - this.margin.top - this.margin.bottom;
 
-        this.x = d3.scaleTime().range([0, this.width]),
+        this.x = d3.scaleTime().range([0, this.width]);
         this.y = d3.scaleLinear().range([this.height, 0]);
 
         this.brush = d3.brushX()

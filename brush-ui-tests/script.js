@@ -150,12 +150,13 @@ function createBrushSpaces(dmMaster) {
     var brushSpaces = [];
     // brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 0, undefined, true));
     brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "fake", true, vegaSpec__NoYDots));
-    brushSpaces.push(new BrushSpace(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), undefined, false));
+    // brushSpaces.push(new BrushSpace(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), undefined, false));
     // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 50, guid(), "fake", false, vegaSpec__NoYDots));
     // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "fake", false, vegaSpec__Area));
     // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "ParticleEvent", false, vegaSpec__Area));
     // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "GithubCommits", false, vegaSpec__NoYDotsText));
     brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "Annotation", false, vegaSpec__NoYDotsText));
+    brushSpaces.push(new BrushSpaceTextualLog(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 400, guid(), "GithubCommits", false));
     brushSpaceGroups.push(brushSpaces);
     // updating = false;
 }

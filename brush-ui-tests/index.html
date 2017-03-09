@@ -11,6 +11,33 @@
             .bs-el-container {
                 margin-top: 10px;
             }
+            .bs-el-vis--textual-log {
+                border: 1px solid #CCC;
+                overflow-y: scroll;
+            }
+            .bs-el-vis .item {
+                padding: 5px 5px 15px 5px;
+            }
+            .bs-el-vis .item:hover {
+                background-color: #FAF9FA;
+            }
+            .bs-el-vis .item .item__timestamp {
+                float: left;
+                min-width: 70px;
+                padding-right: 20px;
+                width: 20%;
+                font-size: 11px;
+                color: #AAA;
+            }
+            .bs-el-vis .item .item__value,
+            .bs-el-vis .item .item__label {
+                float: left;
+                min-width: 150px;
+                width: 80%;
+                font-size: 12px;
+                color: black;
+                padding-left: 0 10px 0 10px;
+            }
             .cover {
                 position: absolute;
                 top: 0;
@@ -99,6 +126,7 @@
               <select class="form-control" id="dropdownVisualTypes">
                 <option>Vega</option>
                 <option>Base</option>
+                <option>Textual Log</option>
               </select>
           </div>
           <div>
@@ -141,6 +169,7 @@
               <select class="form-control" id="editVisualModal_dropdownVisualTypes">
                 <option>Vega</option>
                 <option>Base</option>
+                <option>Textual Log</option>
               </select>
           </div>
           <div>
@@ -176,6 +205,7 @@
     <script src="vega-spec--noydots-text.js"></script>
     <script src="brush-space.js"></script>
     <script src="brush-space-vega.js"></script>
+    <script src="brush-space-textual-log.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
