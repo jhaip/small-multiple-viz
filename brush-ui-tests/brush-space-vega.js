@@ -1,8 +1,13 @@
 class BrushSpaceVega extends BrushSpace {
     constructor(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext, vegaSpec) {
         super(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext);
-
+        this.visualType = "Vega";
         this.originalSpec = vegaSpec;
+    }
+    toJSON() {
+        var baseJSON = super.toJSON();
+        baseJSON["vega_spec"] = this.originalSpec;
+        return baseJSON;
     }
     create_axes() {
         // Do nothing, Vega handles axes
@@ -12,7 +17,7 @@ class BrushSpaceVega extends BrushSpace {
     }
     open_config() {
         $("#editVisualModal_sources-list").val(this.source);
-        $("#editVisualModal_dropdownVisualTypes").val("Vega");
+        $("#editVisualModal_dropdownVisualTypes").val(this.visualType);
         $("#editVisualModal_vegaSpec").val(JSON.stringify(this.originalSpec, undefined, 4));
         $("#editVisualModal_advancedVisualTypeOptions").show(0);
         $('#editVisualModal').modal('show');
@@ -22,7 +27,7 @@ class BrushSpaceVega extends BrushSpace {
         $(".bs-el-container-label--"+this.id).text("Source: "+this.source);
 
         let newVisualType = $("#editVisualModal_dropdownVisualTypes").val();
-        if (newVisualType !== "Vega") {
+        if (newVisualType !== this.visualType) {
             console.log("changing visualization type not handled yet!");
         }
 

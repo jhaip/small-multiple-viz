@@ -1,5 +1,6 @@
 class BrushSpace {
     constructor(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext = false) {
+        this.visualType = "Base";
         this.dispatch = dispatch;
         this.dataModuleMaster = dmMaster;
         this.groupIndex = groupIndex;
@@ -29,6 +30,19 @@ class BrushSpace {
         this.data = [];
 
         this.create_scene();
+    }
+    toJSON() {
+        return {
+            "visual_type": this.visualType,
+            "id": this.id,
+            "group_id": this.groupIndex,
+            "source": this.source,
+            "width": this.container_width,
+            "height": this.container_height,
+            "x_domain": this.x.domain(),
+            "y_domain": this.y.domain(),
+            "is_context": this.is_context
+        }
     }
     create_axes() {
         this.xAxis = d3.axisBottom(this.x);
@@ -72,8 +86,7 @@ class BrushSpace {
     }
     open_config() {
         $("#editVisualModal_sources-list").val(this.source);
-        $("#editVisualModal_dropdownVisualTypes").val("Base");
-        $("#editVisualModal_vegaSpec").val("");
+        $("#editVisualModal_dropdownVisualTypes").val(this.visualType);
         $("#editVisualModal_advancedVisualTypeOptions").hide(0);
         $('#editVisualModal').modal('show');
     }
@@ -82,7 +95,7 @@ class BrushSpace {
         $(".bs-el-container-label--"+this.id).text("Source: "+this.source);
 
         let newVisualType = $("#editVisualModal_dropdownVisualTypes").val();
-        if (newVisualType !== "Base") {
+        if (newVisualType !== this.visualType) {
             console.log("changing visualization type not handled yet!");
         }
 

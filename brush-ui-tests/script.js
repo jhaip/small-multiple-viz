@@ -148,7 +148,7 @@ function createBrushSpaces(dmMaster) {
         .append("h3")
         .text("Group "+groupIndex);
     var brushSpaces = [];
-    // brushSpaces.push(new BrushSpace(dispatch, d3.select(".visual-block"), 960, 150, 0, undefined, true));
+    // brushSpaces.push(new BrushSpace(dispatch, dmMaster, groupIndex, d3.select(".visual-block"), 960, 150, guid(), undefined, false));
     brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "fake", true, vegaSpec__NoYDots));
     // brushSpaces.push(new BrushSpace(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), undefined, false));
     // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 50, guid(), "fake", false, vegaSpec__NoYDots));

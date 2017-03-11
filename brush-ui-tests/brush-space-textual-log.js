@@ -1,28 +1,7 @@
 class BrushSpaceTextualLog extends BrushSpace {
     constructor(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext = false) {
         super(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext);
-    }
-    open_config() {
-        $("#editVisualModal_sources-list").val(this.source);
-        $("#editVisualModal_dropdownVisualTypes").val("Textual Log");
-        $("#editVisualModal_vegaSpec").val("");
-        $("#editVisualModal_advancedVisualTypeOptions").hide(0);
-        $('#editVisualModal').modal('show');
-    }
-    save_config_edits() {
-        this.source = $("#editVisualModal_sources-list").val();
-        $(".bs-el-container-label--"+this.id).text("Source: "+this.source);
-
-        let newVisualType = $("#editVisualModal_dropdownVisualTypes").val();
-        if (newVisualType !== "Textual Log") {
-            console.log("changing visualization type not handled yet!");
-        }
-
-        $('#editVisualModal').modal('hide');
-
-        this.data = [];
-        this.update_scene();
-        this.fetch_data();
+        this.visualType = "Textual Log";
     }
     create_or_update_data_items() {
         var dataItems = this.vis_el.selectAll(".item").data(this.data);
