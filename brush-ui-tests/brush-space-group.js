@@ -12,39 +12,25 @@ class BrushSpaceGroup {
         this.el.append("h3")
             .text("Group " + this.id);
     }
-    add_brush_space(visualType, height, source, isContext, vegaSpec) {
+    add_brush_space(newBrushSpaceJSONDescription) {
+        newBrushSpaceJSONDescription["id"] = guid();
+        newBrushSpaceJSONDescription["group_id"] = this.id;
+        newBrushSpaceJSONDescription["width"] = this.width;
+        newBrushSpaceJSONDescription["x_domain"] = this.x.domain();
+        newBrushSpaceJSONDescription["parent"] = this.el;
         var newBrushSpace;
-        if (visualType === "Vega") {
+        if (newBrushSpaceJSONDescription["visual_type"] === "Vega") {
             newBrushSpace = new BrushSpaceVega(dispatch,
                                                dmMaster,
-                                               this.id,
-                                               this.el,
-                                               this.width,
-                                               height,
-                                               guid(),
-                                               source,
-                                               isContext,
-                                               vegaSpec);
-        } else if (visualType === "Textual Log") {
+                                               newBrushSpaceJSONDescription);
+        } else if (newBrushSpaceJSONDescription["visual_type"] === "Textual Log") {
             newBrushSpace = new BrushSpaceTextualLog(dispatch,
                                                      dmMaster,
-                                                     this.id,
-                                                     this.el,
-                                                     this.width,
-                                                     height,
-                                                     guid(),
-                                                     source,
-                                                     isContext);
-        } else if (visualType === "Base") {
+                                                     newBrushSpaceJSONDescription);
+        } else if (newBrushSpaceJSONDescription["visual_type"] === "Base") {
             newBrushSpace = new BrushSpace(dispatch,
                                            dmMaster,
-                                           this.id,
-                                           this.el,
-                                           this.width,
-                                           height,
-                                           guid(),
-                                           source,
-                                           isContext);
+                                           newBrushSpaceJSONDescription);
         }
         this.brushSpaces.push(newBrushSpace);
         this.update_domain(this.x.domain());   // TODO pass in initial domain directly to brush space

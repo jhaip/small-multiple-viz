@@ -1,6 +1,6 @@
 class BrushSpaceTextualLog extends BrushSpace {
-    constructor(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext = false) {
-        super(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext);
+    constructor(dispatch, dmMaster, description) {
+        super(dispatch, dmMaster, description);
         this.visualType = "Textual Log";
     }
     create_or_update_data_items() {

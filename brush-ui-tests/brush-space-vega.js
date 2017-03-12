@@ -1,8 +1,8 @@
 class BrushSpaceVega extends BrushSpace {
-    constructor(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext, vegaSpec) {
-        super(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext);
+    constructor(dispatch, dmMaster, description) {
+        super(dispatch, dmMaster, description);
         this.visualType = "Vega";
-        this.originalSpec = vegaSpec;
+        this.originalSpec = description["vega_spec"];
     }
     toJSON() {
         var baseJSON = super.toJSON();

@@ -3,7 +3,10 @@ var dispatch = d3.dispatch("brushchange",
                            "statechange",
                            "savedata--Annotation");
 var update_count = 0;
-var brushSpaceGroups = [];
+var myScreen = new Screen(dispatch,
+                          d3.select(".visual-blocks"),
+                          guid(),
+                          [new Date(2017, 0, 25), new Date(2017, 1, 1)]);
 var state = "";
 var dmMaster = undefined;
 
@@ -50,20 +53,16 @@ d3.select("body").on("keydown", function() {
     }
 });
 
-var globalTimeDomain = d3.scaleTime().domain([new Date(2017, 0, 25), new Date(2017, 1, 1)]);
-var that = this;
-
 $("#addTime").click(function() {
-    var newDomain = [globalTimeDomain.domain()[0], new Date(globalTimeDomain.domain()[1].getTime()+1000*60*60*24*30)];
-    globalTimeDomain.domain(newDomain);
-    brushSpaceGroups[0].update_domain(newDomain);
+    myScreen.add_time();
 });
 
 $("#btn-add-group").click(function() {
     createBrushSpaces(dmMaster);
+    newBrushSpaceGroupOption = myScreen.brushSpaceGroups.length-1;
     $("#dropdownAddNewVisualToGroup").append($('<option>', {
-        value: brushSpaceGroups.length-1,
-        text: brushSpaceGroups.length-1
+        value: newBrushSpaceGroupOption,
+        text: newBrushSpaceGroupOption
     }));
 });
 
@@ -72,26 +71,38 @@ $("#submitAddVisual").click(function() {
     var targetGroup = $("#dropdownAddNewVisualToGroup").val();
     var dataSource = $("#sources-list").val();
     var visualType = $("#dropdownVisualTypes").val();
-    var newVegaSpec = JSON.parse($("#vegaSpec").val());
-    console.log(targetGroup);
-    console.log(dataSource);
-    console.log(visualType);
-    console.log(newVegaSpec);
-
-    groupsToAddVisualTo = (targetGroup === "All Groups") ? brushSpaceGroups : [brushSpaceGroups[parseInt(targetGroup)]];
-    for (let i=0; i<groupsToAddVisualTo.length; i+=1) {
-        groupsToAddVisualTo[i].add_brush_space("Vega", 150, dataSource, false, newVegaSpec);
+    var newBrushSpaceJSONDescription = {
+        "visual_type": visualType,
+        "source": dataSource,
+        "height": 150,
+        "is_context": false
+    };
+    if (visualType === "Vega") {
+        var newVegaSpec = JSON.parse($("#vegaSpec").val());
+        newBrushSpaceJSONDescription["vega_spec"] = newVegaSpec;
     }
+
+    myScreen.add_brush_space(targetGroup, newBrushSpaceJSONDescription);
 
     $('#newVisualModal').modal('hide');
 });
 
 function createBrushSpaces(dmMaster) {
-    var newBrushSpaceGroup = new BrushSpaceGroup(dispatch, d3.select(".visual-blocks"), guid(), globalTimeDomain.domain());
-    newBrushSpaceGroup.add_brush_space("Vega", 100, "fake", true, vegaSpec__NoYDots);
-    newBrushSpaceGroup.add_brush_space("Vega", 100, "Annotation", false, vegaSpec__NoYDotsText);
-    // newBrushSpaceGroup.add_brush_space("Textual Log", 400, "GithubCommits", false, undefined);
-    brushSpaceGroups.push(newBrushSpaceGroup);
+    var newTargetGroup = myScreen.add_brush_space_group();
+    myScreen.add_brush_space(newTargetGroup, {
+        "visual_type": "Vega",
+        "source": "fake",
+        "height": 100,
+        "is_context": true,
+        "vega_spec": vegaSpec__NoYDots
+    });
+    myScreen.add_brush_space(newTargetGroup, {
+        "visual_type": "Vega",
+        "source": "Annotation",
+        "height": 100,
+        "is_context": false,
+        "vega_spec": vegaSpec__NoYDotsText
+    });
 }
 
 (function(gapi) {

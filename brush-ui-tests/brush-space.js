@@ -1,13 +1,13 @@
 class BrushSpace {
-    constructor(dispatch, dmMaster, groupIndex, parent, width, height, id, source, isContext = false) {
+    constructor(dispatch, dmMaster, description) {
         this.visualType = "Base";
         this.dispatch = dispatch;
         this.dataModuleMaster = dmMaster;
-        this.groupIndex = groupIndex;
-        this.id = id;
-        this.source = source;
-        this.isContext = isContext;
-        this.parent = parent;
+        this.groupIndex = description["group_id"];
+        this.id = description["id"];
+        this.source = description["source"];
+        this.isContext = description["is_context"];
+        this.parent = description["parent"];
         this.updatingBrush = true;
         var that = this;
 
@@ -22,8 +22,8 @@ class BrushSpace {
         });
 
         this.margin = {top: 20, right: 20, bottom: 20, left: 20};
-        this.container_width = width;
-        this.container_height = height;
+        this.container_width = description["width"];
+        this.container_height = description["height"];
 
         this.state = "";
         this.annotationData = [];
@@ -360,7 +360,6 @@ class BrushSpace {
         }
     }
     brushed() {
-        console.log("brushed");
         if (this.updatingBrush === false) {
             this.updatingBrush = true;
             var s = d3.event.selection || this.x.range();
