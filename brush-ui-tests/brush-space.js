@@ -41,7 +41,7 @@ class BrushSpace {
             "height": this.container_height,
             "x_domain": this.x.domain(),
             "y_domain": this.y.domain(),
-            "is_context": this.is_context
+            "is_context": this.isContext
         }
     }
     create_axes() {

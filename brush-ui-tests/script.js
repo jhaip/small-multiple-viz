@@ -64,27 +64,17 @@ d3.select("body").on("keydown", function() {
 var globalTimeDomain = d3.scaleTime().domain([new Date(2017, 0, 25), new Date(2017, 1, 1)]);
 var that = this;
 
-function dispatch_global_domain(groupIndex) {
-    this.dispatch.call("brushchange-request", {}, {
-        range: [0,1],
-        domain: globalTimeDomain.domain(),
-        source: "",
-        iscontext: false,
-        groupIndex: groupIndex
-    });
-}
-
 $("#addTime").click(function() {
     var newDomain = [globalTimeDomain.domain()[0], new Date(globalTimeDomain.domain()[1].getTime()+1000*60*60*24*30)];
     globalTimeDomain.domain(newDomain);
-    dispatch_global_domain(0);
+    brushSpaceGroups[0].update_domain(newDomain);
 });
 
 $("#btn-add-group").click(function() {
     updating = true;
     createBrushSpaces(dmMaster);
     updating = false;
-    dispatch_global_domain(brushSpaceGroups.length-1);
+    brushSpaceGroups[brushSpaceGroups.length-1].update_domain(globalTimeDomain.domain());
     $("#dropdownAddNewVisualToGroup").append($('<option>', {
         value: brushSpaceGroups.length-1,
         text: brushSpaceGroups.length-1
@@ -106,59 +96,28 @@ $("#submitAddVisual").click(function() {
     groupsToAddVisualTo = [];
     if (targetGroup === "All Groups") {
         for (let i=0; i<brushSpaceGroups.length; i+=1) {
-            brushSpaceGroups[i].push(new BrushSpaceVega(dispatch,
-                                                                  dmMaster,
-                                                                  i,
-                                                                  d3.select(".visual-block--"+i),
-                                                                  500,
-                                                                  150,
-                                                                  guid(),
-                                                                  dataSource,
-                                                                  false,
-                                                                  newVegaSpec));
+            brushSpaceGroups[i].add_brush_space("Vega", 150, dataSource, false, newVegaSpec);
         }
         updating = false;
         for (let i=0; i<brushSpaceGroups.length; i+=1) {
-            dispatch_global_domain(i);
+            brushSpaceGroups[i].update_domain(globalTimeDomain.domain());
         }
     } else {
         targetGroup = parseInt(targetGroup);
-        brushSpaceGroups[targetGroup].push(new BrushSpaceVega(dispatch,
-                                                              dmMaster,
-                                                              targetGroup,
-                                                              d3.select(".visual-block--"+targetGroup),
-                                                              500,
-                                                              150,
-                                                              guid(),
-                                                              dataSource,
-                                                              false,
-                                                              newVegaSpec));
+        brushSpaceGroups[targetGroup].add_brush_space("Vega", 150, dataSource, false, newVegaSpec);
         updating = false;
-        dispatch_global_domain(targetGroup);
+        brushSpaceGroups[targetGroup].update_domain(globalTimeDomain.domain());
     }
 
     $('#newVisualModal').modal('hide');
 });
 
 function createBrushSpaces(dmMaster) {
-    var groupIndex = brushSpaceGroups.length;
-    d3.select(".visual-blocks")
-        .append("div")
-        .attr("class", "visual-block visual-block--"+groupIndex)
-        .append("h3")
-        .text("Group "+groupIndex);
-    var brushSpaces = [];
-    // brushSpaces.push(new BrushSpace(dispatch, dmMaster, groupIndex, d3.select(".visual-block"), 960, 150, guid(), undefined, false));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "fake", true, vegaSpec__NoYDots));
-    // brushSpaces.push(new BrushSpace(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), undefined, false));
-    // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 50, guid(), "fake", false, vegaSpec__NoYDots));
-    // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "fake", false, vegaSpec__Area));
-    // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 150, guid(), "ParticleEvent", false, vegaSpec__Area));
-    // brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "GithubCommits", false, vegaSpec__NoYDotsText));
-    brushSpaces.push(new BrushSpaceVega(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 100, guid(), "Annotation", false, vegaSpec__NoYDotsText));
-    brushSpaces.push(new BrushSpaceTextualLog(dispatch, dmMaster, groupIndex, d3.select(".visual-block--"+groupIndex), 500, 400, guid(), "GithubCommits", false));
-    brushSpaceGroups.push(brushSpaces);
-    // updating = false;
+    var newBrushSpaceGroup = new BrushSpaceGroup(dispatch, d3.select(".visual-blocks"), guid(), globalTimeDomain.domain());
+    newBrushSpaceGroup.add_brush_space("Vega", 100, "fake", true, vegaSpec__NoYDots);
+    newBrushSpaceGroup.add_brush_space("Vega", 100, "Annotation", false, vegaSpec__NoYDotsText);
+    newBrushSpaceGroup.add_brush_space("Textual Log", 400, "GithubCommits", false, undefined);
+    brushSpaceGroups.push(newBrushSpaceGroup);
 }
 
 (function(gapi) {
@@ -174,10 +133,8 @@ function createBrushSpaces(dmMaster) {
           console.log("Google Ready!");
           dmMaster = new DataModuleMaster(dispatch);
           createBrushSpaces(dmMaster);
-          // createBrushSpaces(dmMaster);
           updating = false;
-          dispatch_global_domain(0);
-          // dispatch_global_domain(1);
+          brushSpaceGroups[0].update_domain(globalTimeDomain.domain());
       });
     }
     gapi.load('client', start);
