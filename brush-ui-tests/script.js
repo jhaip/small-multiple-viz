@@ -1,10 +1,7 @@
 var dispatch = d3.dispatch("brushchange",
-                           "brushchange-request",
                            "hoverchange",
                            "statechange",
                            "savedata--Annotation");
-// var parent = d3.select(".visual-block");  // some weird bug that messes up gapi
-var updating = true;
 var update_count = 0;
 var brushSpaceGroups = [];
 var state = "";
@@ -19,14 +16,6 @@ function guid() {
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
     s4() + '-' + s4() + s4() + s4();
 }
-
-dispatch.on("brushchange-request", function(e) {
-    if (updating === false) {
-        updating = true;
-        dispatch.call("brushchange", {}, e);
-        updating = false;
-    }
-});
 
 function change_state(newState) {
     state = newState;
@@ -71,10 +60,7 @@ $("#addTime").click(function() {
 });
 
 $("#btn-add-group").click(function() {
-    updating = true;
     createBrushSpaces(dmMaster);
-    updating = false;
-    brushSpaceGroups[brushSpaceGroups.length-1].update_domain(globalTimeDomain.domain());
     $("#dropdownAddNewVisualToGroup").append($('<option>', {
         value: brushSpaceGroups.length-1,
         text: brushSpaceGroups.length-1
@@ -92,21 +78,9 @@ $("#submitAddVisual").click(function() {
     console.log(visualType);
     console.log(newVegaSpec);
 
-    updating = true;
-    groupsToAddVisualTo = [];
-    if (targetGroup === "All Groups") {
-        for (let i=0; i<brushSpaceGroups.length; i+=1) {
-            brushSpaceGroups[i].add_brush_space("Vega", 150, dataSource, false, newVegaSpec);
-        }
-        updating = false;
-        for (let i=0; i<brushSpaceGroups.length; i+=1) {
-            brushSpaceGroups[i].update_domain(globalTimeDomain.domain());
-        }
-    } else {
-        targetGroup = parseInt(targetGroup);
-        brushSpaceGroups[targetGroup].add_brush_space("Vega", 150, dataSource, false, newVegaSpec);
-        updating = false;
-        brushSpaceGroups[targetGroup].update_domain(globalTimeDomain.domain());
+    groupsToAddVisualTo = (targetGroup === "All Groups") ? brushSpaceGroups : [brushSpaceGroups[parseInt(targetGroup)]];
+    for (let i=0; i<groupsToAddVisualTo.length; i+=1) {
+        groupsToAddVisualTo[i].add_brush_space("Vega", 150, dataSource, false, newVegaSpec);
     }
 
     $('#newVisualModal').modal('hide');
@@ -116,7 +90,7 @@ function createBrushSpaces(dmMaster) {
     var newBrushSpaceGroup = new BrushSpaceGroup(dispatch, d3.select(".visual-blocks"), guid(), globalTimeDomain.domain());
     newBrushSpaceGroup.add_brush_space("Vega", 100, "fake", true, vegaSpec__NoYDots);
     newBrushSpaceGroup.add_brush_space("Vega", 100, "Annotation", false, vegaSpec__NoYDotsText);
-    newBrushSpaceGroup.add_brush_space("Textual Log", 400, "GithubCommits", false, undefined);
+    // newBrushSpaceGroup.add_brush_space("Textual Log", 400, "GithubCommits", false, undefined);
     brushSpaceGroups.push(newBrushSpaceGroup);
 }
 
@@ -133,8 +107,6 @@ function createBrushSpaces(dmMaster) {
           console.log("Google Ready!");
           dmMaster = new DataModuleMaster(dispatch);
           createBrushSpaces(dmMaster);
-          updating = false;
-          brushSpaceGroups[0].update_domain(globalTimeDomain.domain());
       });
     }
     gapi.load('client', start);

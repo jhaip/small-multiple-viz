@@ -8,6 +8,7 @@ class BrushSpace {
         this.source = source;
         this.isContext = isContext;
         this.parent = parent;
+        this.updatingBrush = true;
         var that = this;
 
         this.dispatch.on("brushchange."+this.id, function(e) {
@@ -107,6 +108,7 @@ class BrushSpace {
     }
     create_scene() {
         var that = this;
+        this.updatingBrush = true;
 
         this.container_el = this.parent.append("div")
             .attr("class", "bs-el-container bs-el-container--"+this.id);
@@ -194,6 +196,8 @@ class BrushSpace {
         });
 
         that.create_resize_control();
+
+        this.updatingBrush = false;
     }
     create_resize_control() {
         var that = this;
@@ -223,6 +227,7 @@ class BrushSpace {
     }
     update_scene() {
         var that = this;
+        this.updatingBrush = true;
 
         this.el.style("width", this.container_width+"px")
             .style("height", this.container_height+"px");
@@ -247,6 +252,8 @@ class BrushSpace {
             .attr("height", this.height);
 
         this.update_annotations();
+
+        this.updatingBrush = false;
     }
     update_annotations() {
         var that = this;
@@ -353,21 +360,28 @@ class BrushSpace {
         }
     }
     brushed() {
-        var s = d3.event.selection || this.x.range();
-        var sDomain = s.map(this.x.invert, this.x);
-        this.dispatch.call("brushchange-request", {}, {
-            range: s,
-            domain: sDomain,
-            source: this.id,
-            iscontext: this.isContext,
-            groupIndex: this.groupIndex
-        });
+        console.log("brushed");
+        if (this.updatingBrush === false) {
+            this.updatingBrush = true;
+            var s = d3.event.selection || this.x.range();
+            var sDomain = s.map(this.x.invert, this.x);
+            this.dispatch.call("brushchange", {}, {
+                range: s,
+                domain: sDomain,
+                source: this.id,
+                iscontext: this.isContext,
+                groupIndex: this.groupIndex
+            });
+            this.updatingBrush = false;
+        }
     }
     update_domain(newDomain) {
+        this.updatingBrush = true;
         this.x.domain(newDomain);
         this.update_scene();
         this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
         this.fetch_data();
+        this.updatingBrush = false;
     }
     fetch_data() {
         var that = this;
@@ -388,6 +402,8 @@ class BrushSpace {
         if (e.groupIndex !== this.groupIndex) {
             return;
         }
+        if (this.updatingBrush) return;
+        this.updatingBrush = true;
         if (this.id !== e.source) {
             if (this.isContext && e.domain[0] >= this.x.domain()[0] && e.domain[1] <= this.x.domain()[1]) {
                 var r = e.domain.map(this.x, this.x.invert);
@@ -398,5 +414,6 @@ class BrushSpace {
         } else if (e.iscontext === false) {
             this.update_domain(e.domain);
         }
+        this.updatingBrush = false;
     }
 }

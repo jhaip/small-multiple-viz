@@ -47,11 +47,11 @@ class BrushSpaceGroup {
                                            isContext);
         }
         this.brushSpaces.push(newBrushSpace);
-        // this.update_domain(this.x.domain());   // TODO pass in initial domain directly to brush space
+        this.update_domain(this.x.domain());   // TODO pass in initial domain directly to brush space
     }
     update_domain(newDomain) {
         this.x.domain(newDomain);
-        this.dispatch.call("brushchange-request", {}, {
+        this.dispatch.call("brushchange", {}, {
             range: [0,1],
             domain: this.x.domain(),
             source: "",
