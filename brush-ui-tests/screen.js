@@ -4,7 +4,7 @@ class Screen {
         this.parent = parent;
         this.id = description["id"];
         this.brushSpaceGroups = [];
-        this.defaultDomain = description["default_domain"];
+        this.defaultDomain = description["default_domain"].map(function(d) { return new Date(d); });
 
         var that = this;
         description["brush_space_groups"].forEach(function(bsgDescription) {

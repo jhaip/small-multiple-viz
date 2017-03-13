@@ -1,6 +1,5 @@
 class BrushSpaceTextualLog extends BrushSpace {
-    constructor(dispatch, dmMaster, description) {
-        super(dispatch, dmMaster, description);
+    mid_constructor(description) {
         this.visualType = "Textual Log";
     }
     create_or_update_data_items() {
@@ -39,14 +38,8 @@ class BrushSpaceTextualLog extends BrushSpace {
         this.width = this.container_width - this.margin.left - this.margin.right,
         this.height = this.container_height - this.margin.top - this.margin.bottom;
 
-        this.x = d3.scaleTime();
-        this.y = d3.scaleLinear();
-
         this.htmlOverlayContainer = this.el.append("div")
             .attr("class", "html-overlay-container cover-position");
-
-        this.x.domain([new Date(2015, 0, 1), new Date(2016, 0, 1)]);
-        this.y.domain([0, 1]);
 
         that.create_resize_control();
     }

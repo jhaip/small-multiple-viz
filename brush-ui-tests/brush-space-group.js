@@ -41,7 +41,6 @@ class BrushSpaceGroup {
                                            newBrushSpaceJSONDescription);
         }
         this.brushSpaces.push(newBrushSpace);
-        this.update_domain(this.x.domain());   // TODO pass in initial domain directly to brush space
     }
     update_domain(newDomain) {
         this.x.domain(newDomain);

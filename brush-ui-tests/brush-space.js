@@ -25,14 +25,33 @@ class BrushSpace {
         this.container_width = description["width"];
         this.container_height = description["height"];
 
+        this.width = this.container_width - this.margin.left - this.margin.right,
+        this.height = this.container_height - this.margin.top - this.margin.bottom;
+
+        description["x_domain"] = description["x_domain"].map(function(d) { return new Date(d); });
+        this.x = d3.scaleTime().range([0, this.width]).domain(description["x_domain"]);
+        this.y = d3.scaleLinear().range([this.height, 0]).domain([0, 1]);  // TODO y_domain
+
+        if (typeof description["brush_domain"] !== 'undefined') {
+            description["brush_domain"] = description["brush_domain"].map(function(d) { return new Date(d); });
+        }
+        this.originalBrushSelection = this.convert_brush_domain_to_range(description["brush_domain"]);
+
         this.state = "";
         this.annotationData = [];
 
         this.data = [];
 
+        this.mid_constructor(description);
+
         this.create_scene();
+        this.fetch_data();
+    }
+    mid_constructor(description) {
+
     }
     toJSON() {
+        var brush_domain = this.get_brush_selection().domain;
         return {
             "visual_type": this.visualType,
             "id": this.id,
@@ -42,7 +61,8 @@ class BrushSpace {
             "height": this.container_height,
             "x_domain": this.x.domain(),
             "y_domain": this.y.domain(),
-            "is_context": this.isContext
+            "is_context": this.isContext,
+            "brush_domain": brush_domain
         }
     }
     create_axes() {
@@ -126,8 +146,8 @@ class BrushSpace {
         this.width = this.container_width - this.margin.left - this.margin.right,
         this.height = this.container_height - this.margin.top - this.margin.bottom;
 
-        this.x = d3.scaleTime().range([0, this.width]);
-        this.y = d3.scaleLinear().range([this.height, 0]);
+        this.x.range([0, this.width]);
+        this.y.range([this.height, 0]);
 
         this.brush = d3.brushX()
             .extent([[0, 0], [this.width, this.height]]);
@@ -175,11 +195,10 @@ class BrushSpace {
         this.htmlOverlayContainer = this.el.append("div")
             .attr("class", "html-overlay-container cover-position");
 
-        this.x.domain([new Date(2015, 0, 1), new Date(2016, 0, 1)]);
-        this.y.domain([0, 1]);
-
         if (this.isContext === false) {
             this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
+        } else {
+            this.brush.move(this.context.select(".brush"), this.originalBrushSelection);
         }
 
         this.context.select(".brush .overlay")
@@ -288,23 +307,27 @@ class BrushSpace {
                 .attr("y", function(d) { return that.y(d.y); });
         annotationTexts.exit().remove();
     }
-    resize(width, height) {
-        this.container_width = width;
-        this.container_height = height;
-
-        // save the previous Brush selection
+    get_brush_selection() {
         var brushSelectionRange = d3.brushSelection(this.context.select(".brush").node());
         var brushSelectionDomain = undefined;
         if (brushSelectionRange !== undefined && brushSelectionRange !== null) {
             brushSelectionDomain = brushSelectionRange.map(this.x.invert, this.x);
         }
+        return {domain: brushSelectionDomain, range: brushSelectionRange};
+    }
+    resize(width, height) {
+        this.container_width = width;
+        this.container_height = height;
+
+        // save the previous Brush selection
+        var brushSelection = this.get_brush_selection();
 
         this.update_scene();
 
         // update scene doesn't ensure the brush rectangle gets updated
         // so move it using the saved brushSelectionDomain
-        if (this.isContext && brushSelectionDomain !== undefined) {
-            var newBrushSelectionRange = brushSelectionDomain.map(this.x, this.x.invert);
+        if (this.isContext && brushSelection.domain !== undefined) {
+            var newBrushSelectionRange = brushSelection.domain.map(this.x, this.x.invert);
             this.brush.move(this.context.select(".brush"), newBrushSelectionRange);
         }
     }
@@ -397,6 +420,13 @@ class BrushSpace {
         this.data = JSON.parse(JSON.stringify(e.data));
         this.update_scene();
     }
+    convert_brush_domain_to_range(domain) {
+        if (typeof domain === 'undefined') {
+            return undefined;
+        } else {
+            return domain.map(this.x, this.x.invert);
+        }
+    }
     brush_change(e) {
         if (e.groupIndex !== this.groupIndex) {
             return;
@@ -405,7 +435,7 @@ class BrushSpace {
         this.updatingBrush = true;
         if (this.id !== e.source) {
             if (this.isContext && e.domain[0] >= this.x.domain()[0] && e.domain[1] <= this.x.domain()[1]) {
-                var r = e.domain.map(this.x, this.x.invert);
+                var r = this.convert_brush_domain_to_range(e.domain);
                 this.brush.move(this.context.select(".brush"), r);
             } else {
                 this.update_domain(e.domain);

@@ -1,6 +1,5 @@
 class BrushSpaceVega extends BrushSpace {
-    constructor(dispatch, dmMaster, description) {
-        super(dispatch, dmMaster, description);
+    mid_constructor(description) {
         this.visualType = "Vega";
         this.originalSpec = description["vega_spec"];
     }

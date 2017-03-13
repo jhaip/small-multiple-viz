@@ -6,7 +6,7 @@ var savedDescription = `{
     ],
     "brush_space_groups": [
         {
-            "id": "c6382ae7-977b-7075-8ad3-dd3b1a99d4ae",
+            "id": "f999deaa-4b87-84e0-6be7-d7166643450a",
             "x_domain": [
                 "2017-01-25T05:00:00.000Z",
                 "2017-02-01T05:00:00.000Z"
@@ -15,8 +15,8 @@ var savedDescription = `{
             "brush_spaces": [
                 {
                     "visual_type": "Vega",
-                    "id": "c715f717-5601-253e-5323-fa79649917a1",
-                    "group_id": "c6382ae7-977b-7075-8ad3-dd3b1a99d4ae",
+                    "id": "1885a7c0-9603-5bf1-1f82-3d37e6d29661",
+                    "group_id": "f999deaa-4b87-84e0-6be7-d7166643450a",
                     "source": "fake",
                     "width": 500,
                     "height": 100,
@@ -128,8 +128,8 @@ var savedDescription = `{
                 },
                 {
                     "visual_type": "Vega",
-                    "id": "c7a3e94d-c242-46f0-d1a8-aeed896e298f",
-                    "group_id": "c6382ae7-977b-7075-8ad3-dd3b1a99d4ae",
+                    "id": "a064584c-3c0c-5ab9-8eeb-d7e301de4f96",
+                    "group_id": "f999deaa-4b87-84e0-6be7-d7166643450a",
                     "source": "Annotation",
                     "width": 500,
                     "height": 100,
@@ -266,7 +266,7 @@ var savedDescription = `{
             ]
         },
         {
-            "id": "6c3071b7-8e88-946d-a3eb-07e4327f250e",
+            "id": "3ce234e8-8594-8d8a-d38c-b654c34b2cde",
             "x_domain": [
                 "2017-01-25T05:00:00.000Z",
                 "2017-02-01T05:00:00.000Z"
@@ -275,8 +275,8 @@ var savedDescription = `{
             "brush_spaces": [
                 {
                     "visual_type": "Vega",
-                    "id": "b94c5503-c5da-f706-e14a-317d00c5317a",
-                    "group_id": "6c3071b7-8e88-946d-a3eb-07e4327f250e",
+                    "id": "8485ef5d-9f6c-4dd5-36fe-2f1595b521bd",
+                    "group_id": "3ce234e8-8594-8d8a-d38c-b654c34b2cde",
                     "source": "fake",
                     "width": 500,
                     "height": 100,
@@ -289,6 +289,10 @@ var savedDescription = `{
                         1
                     ],
                     "is_context": true,
+                    "brush_domain": [
+                        "2017-01-29T16:44:20.869Z",
+                        "2017-01-30T05:31:18.260Z"
+                    ],
                     "vega_spec": {
                         "$schema": "https://vega.github.io/schema/vega/v3.0.json",
                         "width": 300,
@@ -388,14 +392,14 @@ var savedDescription = `{
                 },
                 {
                     "visual_type": "Vega",
-                    "id": "4c20f79a-57cc-9243-a861-a3603d70537e",
-                    "group_id": "6c3071b7-8e88-946d-a3eb-07e4327f250e",
+                    "id": "965a7f53-fa33-4011-e629-ffccb8314f9a",
+                    "group_id": "3ce234e8-8594-8d8a-d38c-b654c34b2cde",
                     "source": "Annotation",
                     "width": 500,
                     "height": 100,
                     "x_domain": [
-                        "2017-01-29T17:55:05.330Z",
-                        "2017-01-30T03:21:01.020Z"
+                        "2017-01-29T16:44:20.869Z",
+                        "2017-01-30T05:31:18.260Z"
                     ],
                     "y_domain": [
                         0,
@@ -525,14 +529,14 @@ var savedDescription = `{
                 },
                 {
                     "visual_type": "Vega",
-                    "id": "a5c672e7-eb51-7049-3a7a-4a45dbbda092",
-                    "group_id": "6c3071b7-8e88-946d-a3eb-07e4327f250e",
+                    "id": "4cf92eb4-88e4-7abc-521c-0b47e3937c37",
+                    "group_id": "3ce234e8-8594-8d8a-d38c-b654c34b2cde",
                     "source": "ParticleEvent",
                     "width": 500,
                     "height": 150,
                     "x_domain": [
-                        "2017-01-29T17:55:05.330Z",
-                        "2017-01-30T03:21:01.020Z"
+                        "2017-01-29T16:44:20.869Z",
+                        "2017-01-30T05:31:18.260Z"
                     ],
                     "y_domain": [
                         0,

@@ -116,6 +116,14 @@ function createBrushSpaces(dmMaster) {
           dmMaster = new DataModuleMaster(dispatch);
           myScreen = new Screen(dispatch,
                                 d3.select(".visual-blocks"),
+                                // {
+                                //     "id": "6ccdec24-722c-a8e6-11c9-cfbe5da8892c",
+                                //     "default_domain": [
+                                //         "2017-01-25T05:00:00.000Z",
+                                //         "2017-02-01T05:00:00.000Z"
+                                //     ],
+                                //     "brush_space_groups": []
+                                // });
                                 JSON.parse(savedDescription));
           // createBrushSpaces(dmMaster);
       });
