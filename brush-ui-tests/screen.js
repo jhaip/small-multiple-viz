@@ -3,8 +3,13 @@ class Screen {
         this.dispatch = dispatch;
         this.parent = parent;
         this.id = description["id"];
-        this.brushSpaceGroups = description["brush_space_groups"];
+        this.brushSpaceGroups = [];
         this.defaultDomain = description["default_domain"];
+
+        var that = this;
+        description["brush_space_groups"].forEach(function(bsgDescription) {
+            that.add_brush_space_group(bsgDescription);
+        });
     }
     toJSON() {
         return {
@@ -13,15 +18,16 @@ class Screen {
             brush_space_groups: this.brushSpaceGroups.map(function(bsg) { return bsg.toJSON(); })
         };
     }
-    add_brush_space_group() {
+    add_brush_space_group(description) {
+        description = $.extend({
+            id: guid(),
+            x_domain: this.defaultDomain,
+            width: 500,
+            brush_spaces: []
+        }, description);
         var newBrushSpaceGroup = new BrushSpaceGroup(this.dispatch,
                                                      this.parent,
-                                                     {
-                                                         id: guid(),
-                                                         x_domain: this.defaultDomain,
-                                                         width: 500,
-                                                         brush_spaces: []
-                                                     });
+                                                     description);
         this.brushSpaceGroups.push(newBrushSpaceGroup);
         return this.brushSpaceGroups.length-1;
     }

@@ -3,13 +3,7 @@ var dispatch = d3.dispatch("brushchange",
                            "statechange",
                            "savedata--Annotation");
 var update_count = 0;
-var myScreen = new Screen(dispatch,
-                          d3.select(".visual-blocks"),
-                          {
-                              id: guid(),
-                              default_domain: [new Date(2017, 0, 25), new Date(2017, 1, 1)],
-                              brush_space_groups: []
-                          });
+var myScreen;
 var state = "";
 var dmMaster = undefined;
 
@@ -120,7 +114,10 @@ function createBrushSpaces(dmMaster) {
       }).then(function() {
           console.log("Google Ready!");
           dmMaster = new DataModuleMaster(dispatch);
-          createBrushSpaces(dmMaster);
+          myScreen = new Screen(dispatch,
+                                d3.select(".visual-blocks"),
+                                JSON.parse(savedDescription));
+          // createBrushSpaces(dmMaster);
       });
     }
     gapi.load('client', start);
