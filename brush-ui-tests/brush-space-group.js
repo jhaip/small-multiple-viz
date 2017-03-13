@@ -1,11 +1,11 @@
 class BrushSpaceGroup {
-    constructor(dispatch, parent, id, domain) {
+    constructor(dispatch, parent, description) {
         this.dispatch = dispatch;
         this.parent = parent;
-        this.id = id;
-        this.x = d3.scaleTime().domain(domain);
-        this.width = 500;
-        this.brushSpaces = [];
+        this.id = description["id"];
+        this.x = d3.scaleTime().domain(description["x_domain"]);
+        this.width = description["width"];
+        this.brushSpaces = description["brush_spaces"];
 
         this.el = this.parent.append("div")
             .attr("class", "visual-block visual-block--" + this.id);

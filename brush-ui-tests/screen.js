@@ -1,16 +1,27 @@
 class Screen {
-    constructor(dispatch, parent, id, defaultDomain) {
+    constructor(dispatch, parent, description) {
         this.dispatch = dispatch;
         this.parent = parent;
-        this.id = id;
-        this.brushSpaceGroups = [];
-        this.defaultDomain = defaultDomain;
+        this.id = description["id"];
+        this.brushSpaceGroups = description["brush_space_groups"];
+        this.defaultDomain = description["default_domain"];
+    }
+    toJSON() {
+        return {
+            id: this.id,
+            default_domain: this.defaultDomain,
+            brush_space_groups: this.brushSpaceGroups.map(function(bsg) { return bsg.toJSON(); })
+        };
     }
     add_brush_space_group() {
         var newBrushSpaceGroup = new BrushSpaceGroup(this.dispatch,
                                                      this.parent,
-                                                     guid(),
-                                                     this.defaultDomain);
+                                                     {
+                                                         id: guid(),
+                                                         x_domain: this.defaultDomain,
+                                                         width: 500,
+                                                         brush_spaces: []
+                                                     });
         this.brushSpaceGroups.push(newBrushSpaceGroup);
         return this.brushSpaceGroups.length-1;
     }

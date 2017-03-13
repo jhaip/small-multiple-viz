@@ -5,8 +5,11 @@ var dispatch = d3.dispatch("brushchange",
 var update_count = 0;
 var myScreen = new Screen(dispatch,
                           d3.select(".visual-blocks"),
-                          guid(),
-                          [new Date(2017, 0, 25), new Date(2017, 1, 1)]);
+                          {
+                              id: guid(),
+                              default_domain: [new Date(2017, 0, 25), new Date(2017, 1, 1)],
+                              brush_space_groups: []
+                          });
 var state = "";
 var dmMaster = undefined;
 
