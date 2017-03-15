@@ -8,7 +8,8 @@ class BrushSpace {
         this.source = description["source"];
         this.isContext = description["is_context"];
         this.parent = description["parent"];
-        this.updatingBrush = true;
+        this.updatingBrushStack = new Array();
+        this.push_to_updating_stack();
         var that = this;
 
         this.dispatch.on("brushchange."+this.id, function(e) {
@@ -46,9 +47,17 @@ class BrushSpace {
 
         this.create_scene();
         this.fetch_data();
+
+        this.pop_off_updating_stack();
     }
     mid_constructor(description) {
 
+    }
+    push_to_updating_stack() {
+        this.updatingBrushStack.push("true");
+    }
+    pop_off_updating_stack() {
+        this.updatingBrushStack.pop();
     }
     toJSON() {
         var brush_domain = this.get_brush_selection().domain;
@@ -93,7 +102,7 @@ class BrushSpace {
         this.label_el.append("span")
             .attr("class", "bs-el-container-label bs-el-container-label--"+this.id)
             .style("float", "left")
-            .text("Source: "+this.source);
+            .text("Source: "+this.source+" ID: "+this.id.substring(0,8));
         this.label_el.append("span")
             .style("float", "right")
             .html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Edit</button>')
@@ -128,7 +137,6 @@ class BrushSpace {
     }
     create_scene() {
         var that = this;
-        this.updatingBrush = true;
 
         this.container_el = this.parent.append("div")
             .attr("class", "bs-el-container bs-el-container--"+this.id);
@@ -149,6 +157,7 @@ class BrushSpace {
         this.x.range([0, this.width]);
         this.y.range([this.height, 0]);
 
+        this.push_to_updating_stack();
         this.brush = d3.brushX()
             .extent([[0, 0], [this.width, this.height]]);
         if (this.isContext) {
@@ -160,6 +169,7 @@ class BrushSpace {
                 that.brushed();
             });
         }
+        this.pop_off_updating_stack();
 
         this.context = this.svg.append("g")
             .attr("class", "context")
@@ -195,11 +205,13 @@ class BrushSpace {
         this.htmlOverlayContainer = this.el.append("div")
             .attr("class", "html-overlay-container cover-position");
 
+        this.push_to_updating_stack();
         if (this.isContext === false) {
             this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
         } else {
             this.brush.move(this.context.select(".brush"), this.originalBrushSelection);
         }
+        this.pop_off_updating_stack();
 
         this.context.select(".brush .overlay")
             .on("mousemove", function() {
@@ -215,8 +227,6 @@ class BrushSpace {
         });
 
         that.create_resize_control();
-
-        this.updatingBrush = false;
     }
     create_resize_control() {
         var that = this;
@@ -246,7 +256,6 @@ class BrushSpace {
     }
     update_scene() {
         var that = this;
-        this.updatingBrush = true;
 
         this.el.style("width", this.container_width+"px")
             .style("height", this.container_height+"px");
@@ -257,22 +266,24 @@ class BrushSpace {
         this.x.range([0, this.width]),
         this.y.range([this.height, 0]);
 
+        this.push_to_updating_stack();
         this.brush.extent([[0, 0], [this.width, this.height]]);
+        this.pop_off_updating_stack();
 
         this.update_axes();
 
         this.focus.attr("y2", this.height);
 
+        this.push_to_updating_stack();
         this.context.select(".brush")
             .call(this.brush);
+        this.pop_off_updating_stack();
 
         this.overlay.select("rect")
             .attr("width", this.width)
             .attr("height", this.height);
 
         this.update_annotations();
-
-        this.updatingBrush = false;
     }
     update_annotations() {
         var that = this;
@@ -328,7 +339,9 @@ class BrushSpace {
         // so move it using the saved brushSelectionDomain
         if (this.isContext && brushSelection.domain !== undefined) {
             var newBrushSelectionRange = brushSelection.domain.map(this.x, this.x.invert);
+            this.push_to_updating_stack();
             this.brush.move(this.context.select(".brush"), newBrushSelectionRange);
+            this.pop_off_updating_stack();
         }
     }
     mousemove(e) {
@@ -383,8 +396,8 @@ class BrushSpace {
         }
     }
     brushed() {
-        if (this.updatingBrush === false) {
-            this.updatingBrush = true;
+        if (this.updatingBrushStack.length === 0) {
+            this.push_to_updating_stack();
             var s = d3.event.selection || this.x.range();
             var sDomain = s.map(this.x.invert, this.x);
             this.dispatch.call("brushchange", {}, {
@@ -394,16 +407,22 @@ class BrushSpace {
                 iscontext: this.isContext,
                 groupIndex: this.groupIndex
             });
-            this.updatingBrush = false;
+            if (this.isContext) {
+                var r = this.convert_brush_domain_to_range(sDomain);
+                this.brush.move(this.context.select(".brush"), r);
+            } else {
+                this.update_domain(sDomain);
+            }
+            this.pop_off_updating_stack();
         }
     }
     update_domain(newDomain) {
-        this.updatingBrush = true;
+        this.push_to_updating_stack();
         this.x.domain(newDomain);
         this.update_scene();
         this.brush.move(this.context.select(".brush"), null);  // clear any visible brush
         this.fetch_data();
-        this.updatingBrush = false;
+        this.pop_off_updating_stack();
     }
     fetch_data() {
         var that = this;
@@ -428,11 +447,9 @@ class BrushSpace {
         }
     }
     brush_change(e) {
-        if (e.groupIndex !== this.groupIndex) {
-            return;
-        }
-        if (this.updatingBrush) return;
-        this.updatingBrush = true;
+        if (e.groupIndex !== this.groupIndex) return;
+        if (this.updatingBrushStack.length !== 0) return;
+        this.push_to_updating_stack();
         if (this.id !== e.source) {
             if (this.isContext && e.domain[0] >= this.x.domain()[0] && e.domain[1] <= this.x.domain()[1]) {
                 var r = this.convert_brush_domain_to_range(e.domain);
@@ -443,6 +460,6 @@ class BrushSpace {
         } else if (e.iscontext === false) {
             this.update_domain(e.domain);
         }
-        this.updatingBrush = false;
+        this.pop_off_updating_stack();
     }
 }
