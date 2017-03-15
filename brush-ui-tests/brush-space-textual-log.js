@@ -3,6 +3,7 @@ class BrushSpaceTextualLog extends BrushSpace {
         this.visualType = "Textual Log";
     }
     create_or_update_data_items() {
+        var that = this;
         var dataItems = this.vis_el.selectAll(".item").data(this.data);
         dataItems.enter().append("div")
                 .attr("class", "item clearfix item--"+this.source)
@@ -17,7 +18,16 @@ class BrushSpaceTextualLog extends BrushSpace {
                     <div class="item__label">${val}</div>
                     `;
                     return template;
+                })
+                .on("mouseover", function(d, i) {
+                    var x0 = new Date(d.u);
+                    that.dispatch.call("hoverchange", {}, {
+                        x0: x0,
+                        groupIndex: that.groupIndex
+                    });
                 });
+
+        dataItems.exit().remove();
     }
     create_scene() {
         var that = this;
