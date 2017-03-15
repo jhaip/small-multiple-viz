@@ -102,7 +102,7 @@ class BrushSpace {
         this.label_el.append("span")
             .attr("class", "bs-el-container-label bs-el-container-label--"+this.id)
             .style("float", "left")
-            .text("Source: "+this.source+" ID: "+this.id.substring(0,8));
+            .text("Source: "+this.source+" -- ID: "+this.id.substring(0,8));
         this.label_el.append("span")
             .style("float", "right")
             .html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Edit</button>')
