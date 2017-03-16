@@ -1,5 +1,4 @@
 var vegaSpec__Area = {
-  "$schema": "https://vega.github.io/schema/vega/v3.0.json",
   "width": 300,
   "height": 150,
   "padding": {"top": 10, "left": 20, "bottom": 20, "right": 20},

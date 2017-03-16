@@ -52,6 +52,11 @@ d3.select("body").on("keydown", function() {
 
 $("#addTime").click(function() {
     myScreen.add_time();
+    saveScreenDescription();
+});
+
+$("#saveScreenDescription").click(function() {
+    saveScreenDescription();
 });
 
 $("#btn-add-group").click(function() {
@@ -81,6 +86,8 @@ $("#submitAddVisual").click(function() {
 
     myScreen.add_brush_space(targetGroup, newBrushSpaceJSONDescription);
 
+    saveScreenDescription();
+
     $('#newVisualModal').modal('hide');
 });
 
@@ -100,6 +107,16 @@ function createBrushSpaces(dmMaster) {
         "is_context": false,
         "vega_spec": vegaSpec__NoYDotsText
     });
+
+    saveScreenDescription();
+}
+
+function saveScreenDescription() {
+    var screenDescription = myScreen.toJSON();
+    var screenId = "6ccdec24-722c-a8e6-11c9-cfbe5da8892c";
+    var updates = {};
+    updates['/screens/' + screenId] = screenDescription;
+    return firebase.database().ref().update(updates);
 }
 
 function init() {

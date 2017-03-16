@@ -1,5 +1,4 @@
 var vegaSpec__NoYDots = {
-  "$schema": "https://vega.github.io/schema/vega/v3.0.json",
   "width": 300,
   "height": 1,
   "padding": 20,

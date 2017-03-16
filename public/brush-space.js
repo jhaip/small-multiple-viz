@@ -33,7 +33,7 @@ class BrushSpace {
         this.x = d3.scaleTime().range([0, this.width]).domain(description["x_domain"]);
         this.y = d3.scaleLinear().range([this.height, 0]).domain([0, 1]);  // TODO y_domain
 
-        if (typeof description["brush_domain"] !== 'undefined') {
+        if (typeof description["brush_domain"] !== 'undefined' && description["brush_domain"] !== null) {
             description["brush_domain"] = description["brush_domain"].map(function(d) { return new Date(d); });
         }
         this.originalBrushSelection = this.convert_brush_domain_to_range(description["brush_domain"]);
@@ -61,6 +61,7 @@ class BrushSpace {
     }
     toJSON() {
         var brush_domain = this.get_brush_selection().domain;
+        if (typeof brush_domain === 'undefined') brush_domain = null;
         return {
             "visual_type": this.visualType,
             "id": this.id,
