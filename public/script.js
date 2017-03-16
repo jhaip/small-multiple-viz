@@ -102,6 +102,18 @@ function createBrushSpaces(dmMaster) {
     });
 }
 
+function init() {
+    var screenId = "6ccdec24-722c-a8e6-11c9-cfbe5da8892c";
+    return firebase.database().ref('/screens/' + screenId).once('value').then(function(snapshot) {
+        var savedDescription = snapshot.val();
+        // console.log(savedDescription);
+        dmMaster = new DataModuleMaster(dispatch);
+        myScreen = new Screen(dispatch,
+                              d3.select(".visual-blocks"),
+                              savedDescription);
+    });
+}
+
 (function(gapi) {
     function start() {
       // 2. Initialize the JavaScript client library.
@@ -113,19 +125,7 @@ function createBrushSpaces(dmMaster) {
         'scope': 'https://www.googleapis.com/auth/datastore',
       }).then(function() {
           console.log("Google Ready!");
-          dmMaster = new DataModuleMaster(dispatch);
-          myScreen = new Screen(dispatch,
-                                d3.select(".visual-blocks"),
-                                // {
-                                //     "id": "6ccdec24-722c-a8e6-11c9-cfbe5da8892c",
-                                //     "default_domain": [
-                                //         "2017-01-25T05:00:00.000Z",
-                                //         "2017-02-01T05:00:00.000Z"
-                                //     ],
-                                //     "brush_space_groups": []
-                                // });
-                                JSON.parse(savedDescription));
-          // createBrushSpaces(dmMaster);
+          init();
       });
     }
     gapi.load('client', start);

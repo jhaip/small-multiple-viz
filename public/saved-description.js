@@ -30,7 +30,6 @@ var savedDescription = `{
                     ],
                     "is_context": true,
                     "vega_spec": {
-                        "$schema": "https://vega.github.io/schema/vega/v3.0.json",
                         "width": 300,
                         "height": 1,
                         "padding": 20,
@@ -143,7 +142,6 @@ var savedDescription = `{
                     ],
                     "is_context": false,
                     "vega_spec": {
-                        "$schema": "https://vega.github.io/schema/vega/v3.0.json",
                         "width": 300,
                         "height": 1,
                         "padding": 20,
@@ -294,7 +292,6 @@ var savedDescription = `{
                         "2017-01-30T05:31:18.260Z"
                     ],
                     "vega_spec": {
-                        "$schema": "https://vega.github.io/schema/vega/v3.0.json",
                         "width": 300,
                         "height": 1,
                         "padding": 20,
@@ -407,7 +404,6 @@ var savedDescription = `{
                     ],
                     "is_context": false,
                     "vega_spec": {
-                        "$schema": "https://vega.github.io/schema/vega/v3.0.json",
                         "width": 300,
                         "height": 1,
                         "padding": 20,
@@ -544,7 +540,6 @@ var savedDescription = `{
                     ],
                     "is_context": false,
                     "vega_spec": {
-                        "$schema": "https://vega.github.io/schema/vega/v3.0.json",
                         "width": 300,
                         "height": 150,
                         "padding": {
