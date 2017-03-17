@@ -16,6 +16,10 @@ class BrushSpaceTextualLog extends BrushSpace {
                     let template = `
                     <div class="item__timestamp">${d.u}</div>
                     <div class="item__label">${val}</div>
+                    <div class="item__code" style="display: none">
+                        <h3>Code:</h3>
+                        <pre class="item__code__pre"><code class="language-js item__code__textarea"></code></pre>
+                    </div>
                     `;
                     return template;
                 })
@@ -25,6 +29,18 @@ class BrushSpaceTextualLog extends BrushSpace {
                         x0: x0,
                         groupIndex: that.groupIndex
                     });
+                })
+                .on("click", function(d, i) {
+                    console.log(this);
+                    d3.selectAll(".item__code").style("display", "none");
+                    var codeEl = d3.select(this).select(".item__code");
+                    codeEl.style("display", "block");
+                    that.dataModuleMaster.fetch_data("GithubCommit", d.commit).done(function(fileText) {
+                        codeEl.select(".item__code__textarea").text(fileText);
+                        Prism.highlightElement(codeEl.select(".item__code__textarea").node(), false, function() { console.log("done"); });
+                    }).fail(function(e) {
+                        console.log("Error fetching data from "+this.id+" for source "+this.source);
+                    })
                 });
 
         dataItems.exit().remove();
@@ -91,6 +107,9 @@ class BrushSpaceTextualLog extends BrushSpace {
         this.x.domain(newDomain);
         this.update_scene();
         this.fetch_data();
+    }
+    get_brush_selection() {
+        return {domain: undefined};
     }
     brush_change(e) {
         if (e.groupIndex !== this.groupIndex) {

@@ -3,11 +3,13 @@ class DataModuleMaster {
         var dmFake = new DataModule(dispatch, "fake");
         var dm = new DataModuleGoogleDatastore(dispatch, "ParticleEvent");
         var dmGithub = new DataModuleGithubCommits(dispatch, "GithubCommits");
+        var dmCommit = new DataModuleGithubCommit(dispatch, "GithubCommit");
         var dmAnnotations = new DataModuleGoogleDatastoreAnnotations(dispatch, "Annotation");
         this.dmMap = {
             "fake": dmFake,
             "ParticleEvent": dm,
             "GithubCommits": dmGithub,
+            "GithubCommit": dmCommit,
             "Annotation": dmAnnotations
         }
     }
