@@ -5,12 +5,14 @@ class DataModuleMaster {
         var dmGithub = new DataModuleGithubCommits(dispatch, "GithubCommits");
         var dmCommit = new DataModuleGithubCommit(dispatch, "GithubCommit");
         var dmAnnotations = new DataModuleGoogleDatastoreAnnotations(dispatch, "Annotation");
+        var dmVideoFeed = new DataModuleVideoFeed(dispatch, "VideoFeed");
         this.dmMap = {
             "fake": dmFake,
             "ParticleEvent": dm,
             "GithubCommits": dmGithub,
             "GithubCommit": dmCommit,
-            "Annotation": dmAnnotations
+            "Annotation": dmAnnotations,
+            "VideoFeed": dmVideoFeed
         }
     }
     fetch_data(source, domain) {
