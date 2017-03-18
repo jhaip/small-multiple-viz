@@ -35,6 +35,10 @@ class BrushSpaceGroup {
             newBrushSpace = new BrushSpaceTextualLog(dispatch,
                                                      dmMaster,
                                                      newBrushSpaceJSONDescription);
+        } else if (newBrushSpaceJSONDescription["visual_type"] === "VideoFeed") {
+            newBrushSpace = new BrushSpaceVideoFeed(dispatch,
+                                                     dmMaster,
+                                                     newBrushSpaceJSONDescription);
         } else if (newBrushSpaceJSONDescription["visual_type"] === "Base") {
             newBrushSpace = new BrushSpace(dispatch,
                                            dmMaster,

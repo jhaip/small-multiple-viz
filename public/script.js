@@ -123,7 +123,6 @@ function init() {
     var screenId = "6ccdec24-722c-a8e6-11c9-cfbe5da8892c";
     return firebase.database().ref('/screens/' + screenId).once('value').then(function(snapshot) {
         var savedDescription = snapshot.val();
-        // console.log(savedDescription);
         dmMaster = new DataModuleMaster(dispatch);
         myScreen = new Screen(dispatch,
                               d3.select(".visual-blocks"),

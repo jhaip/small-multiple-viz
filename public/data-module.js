@@ -27,8 +27,7 @@ class DataModule {
         if (typeof defer === 'undefined') {
             defer = $.Deferred();
         }
-        if (this.data.length === 0 || e.domain[0] < this.scale.domain()[0] || e.domain[1] > this.scale.domain()[1]) {
-            console.log("outside range! should be fetching new data");
+        if (e.domain[0] < this.scale.domain()[0] || e.domain[1] > this.scale.domain()[1]) {
             this.fetch_data(e, defer);
             return defer.promise();
         }
