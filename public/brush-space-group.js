@@ -10,8 +10,8 @@ class BrushSpaceGroup {
 
         this.el = this.parent.append("div")
             .attr("class", "visual-block visual-block--" + this.id);
-        this.el.append("h3")
-            .text("Group " + this.id);
+        this.el.append("h5")
+            .text(this.x.domain()[0].toUTCString() + " - " + this.x.domain()[1].toUTCString());
 
         var that = this;
         description["brush_spaces"].forEach(function(bsDescription) {

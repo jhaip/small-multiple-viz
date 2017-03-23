@@ -50,10 +50,10 @@ d3.select("body").on("keydown", function() {
     }
 });
 
-$("#addTime").click(function() {
-    myScreen.add_time();
-    saveScreenDescription();
-});
+// $("#addTime").click(function() {
+//     myScreen.add_time();
+//     saveScreenDescription();
+// });
 
 $("#saveScreenDescription").click(function() {
     saveScreenDescription();
@@ -61,11 +61,11 @@ $("#saveScreenDescription").click(function() {
 
 $("#btn-add-group").click(function() {
     createBrushSpaces(dmMaster);
-    newBrushSpaceGroupOption = myScreen.brushSpaceGroups.length-1;
-    $("#dropdownAddNewVisualToGroup").append($('<option>', {
-        value: newBrushSpaceGroupOption,
-        text: newBrushSpaceGroupOption
-    }));
+    // newBrushSpaceGroupOption = myScreen.brushSpaceGroups.length-1;
+    // $("#dropdownAddNewVisualToGroup").append($('<option>', {
+    //     value: newBrushSpaceGroupOption,
+    //     text: newBrushSpaceGroupOption
+    // }));
 });
 
 $("#vegaSpec").text(JSON.stringify(vegaSpec__Area, undefined, 4));
@@ -113,14 +113,14 @@ function createBrushSpaces(dmMaster) {
 
 function saveScreenDescription() {
     var screenDescription = myScreen.toJSON();
-    var screenId = "6ccdec24-722c-a8e6-11c9-cfbe5da8892c";
+    var screenId = "6dddec24-722c-a8e6-11c9-cfbe5da8892d";
     var updates = {};
     updates['/screens/' + screenId] = screenDescription;
     return firebase.database().ref().update(updates);
 }
 
 function init() {
-    var screenId = "6ccdec24-722c-a8e6-11c9-cfbe5da8892c";
+    var screenId = "6dddec24-722c-a8e6-11c9-cfbe5da8892d";
     return firebase.database().ref('/screens/' + screenId).once('value').then(function(snapshot) {
         var savedDescription = snapshot.val();
         dmMaster = new DataModuleMaster(dispatch);
