@@ -27,8 +27,7 @@ class SmallMultiple {
     add_labels() {
         var that = this;
         var rowLabelEl = this.parent.insert("div",":first-child")
-            .attr("class", "visual-block")
-            .style("margin-top", "25px");
+            .attr("class", "visual-block");
 
         rowLabelEl.selectAll("div").data(this.sources)
             .enter().append("div")
@@ -37,7 +36,8 @@ class SmallMultiple {
             })
             .style("margin-top", "10px")
             .html(function(d) {
-                return `<h5 style="text-align: right">${d}</h5>`;
+                return `<h5 style="text-align: right">${d}</h5>
+                    <button type="button" class="btn btn-default btn-xs" style="float: right;"><span class="glyphicon glyphicon-cog" aria-hidden="true" style=""></span> Edit</button>`;
             });
     }
     add_brush_space_group(description) {

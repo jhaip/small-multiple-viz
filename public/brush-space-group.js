@@ -11,7 +11,7 @@ class BrushSpaceGroup {
         this.el = this.parent.append("div")
             .attr("class", "visual-block visual-block--" + this.id);
         this.el.append("h5")
-            .text(this.x.domain()[0].toUTCString() + " - " + this.x.domain()[1].toUTCString());
+            .text(moment(this.x.domain()[0]).format("M/D H:mm:ss.SSSS") + " - " + moment(this.x.domain()[1]).format("M/D H:mm:ss.SSSS"));
 
         var that = this;
         description["brush_spaces"].forEach(function(bsDescription) {

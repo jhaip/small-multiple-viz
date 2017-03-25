@@ -12,9 +12,15 @@ class BrushSpaceTextualLog extends BrushSpace {
                     let val = d.v;
                     if (d.label) {
                         val = d.label;
+
                     }
+                    let timestamp = d.u;
+                    if (moment(timestamp).isValid()) {
+                        timestamp = moment(timestamp).format("M/D H:mm:ss.SSSS");
+                    }
+
                     let template = `
-                    <div class="item__timestamp">${d.u}</div>
+                    <div class="item__timestamp">${timestamp}</div>
                     <div class="item__label">${val}</div>
                     <div class="item__code" style="display: none">
                         <h3>Code:</h3>
