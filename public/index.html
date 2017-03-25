@@ -49,19 +49,38 @@
                 top: 0;
                 left: 0;
             }
-            .bs-el-resize {
+            .bs-el-resize, .small-multiple-resize {
                 width: 100%;
                 height: 5px;
-                /*position: absolute;
-                bottom: 0px;
-                left: 0px;*/
                 z-index: 100;
             }
-            .bs-el-resize:hover {
+            .small-multiple {
+                position: relative;
+            }
+            .small-multiple-resize {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                background-color: green;
+            }
+            .small-multiple-resize-x {
+                width: 5px;
+                height: 100%;
+                z-index: 100;
+                position: absolute;
+                right: 0;
+                top: 0;
+                background-color: red;
+            }
+            .bs-el-resize:hover,
+            .small-multiple-resize:hover,
+            .small-multiple-resize-x:hover {
                 cursor: ns-resize;
                 background-color: rgba(100,150,100,0.2);
             }
-            .bs-el-resize.active {
+            .bs-el-resize.active,
+            .small-multiple-resize.active,
+            .small-multiple-resize-x.active {
                 background-color: rgba(100,150,100,0.5);
             }
 

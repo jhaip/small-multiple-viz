@@ -9,11 +9,21 @@ class SmallMultiple {
         this.height = description["height"];
         this.sources = [];
 
+        this.el = this.parent.append("div")
+            .attr("class", "small-multiple small-multiple-"+this.id)
+            .style("width", this.width+"px")
+            .style("height", this.height+"px")
+            .style("background-color", "#FAFAFF");
+        this.visual_container = this.el.append("div")
+            .attr("class", "clearfix");
+
         var that = this;
         description["brush_space_groups"].forEach(function(bsgDescription) {
             that.add_brush_space_group(bsgDescription);
         });
         this.add_labels();
+        this.create_resize_control_y();
+        this.create_resize_control_x();
     }
     toJSON() {
         return {
@@ -24,9 +34,66 @@ class SmallMultiple {
             height: this.height
         };
     }
+    resize(width, height) {
+        this.width = width;
+        this.height = height;
+    }
+    create_resize_control_x() {
+        var that = this;
+        var startX = 0;
+
+        function dragstarted(d) {
+            startX = d3.event.x;
+            d3.select(this).raise().classed("active", true);
+        }
+
+        function dragged(d) {
+            d3.select(".small-multiple-"+that.id).style("width", (that.width+d3.event.x-startX)+"px");
+        }
+
+        function dragended(d) {
+            d3.select(this).classed("active", false);
+            that.resize(that.width+d3.event.x-startX, that.height);
+        }
+
+        this.el.append("div")
+            .attr("class", "small-multiple-resize-x small-multiple-resize-x--"+this.id)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended)
+            );
+    }
+    create_resize_control_y() {
+        var that = this;
+        var startY = 0;
+
+        function dragstarted(d) {
+            startY = d3.event.y;
+            d3.select(this).raise().classed("active", true);
+        }
+
+        function dragged(d) {
+            console.log("dragged");
+            d3.select(".small-multiple-"+that.id).style("height", (that.height+d3.event.y-startY)+"px");
+        }
+
+        function dragended(d) {
+            d3.select(this).classed("active", false);
+            that.resize(that.width, that.height+d3.event.y-startY);
+        }
+
+        this.el.append("div")
+            .attr("class", "small-multiple-resize small-multiple-resize--"+this.id)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended)
+            );
+    }
     add_labels() {
         var that = this;
-        var rowLabelEl = this.parent.insert("div",":first-child")
+        var rowLabelEl = this.visual_container.insert("div",":first-child")
             .attr("class", "visual-block");
 
         rowLabelEl.selectAll("div").data(this.sources)
@@ -48,7 +115,7 @@ class SmallMultiple {
             brush_spaces: []
         }, description);
         var newBrushSpaceGroup = new BrushSpaceGroup(this.dispatch,
-                                                     this.parent,
+                                                     this.visual_container,
                                                      description);
         this.brushSpaceGroups.push(newBrushSpaceGroup);
         if (this.sources.length === 0) {

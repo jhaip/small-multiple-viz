@@ -96,20 +96,20 @@ $("#submitAddVisual").click(function() {
 function createBrushSpaces(dmMaster) {
     console.log("create brush spaces");
     var newTargetGroup = myScreen.add_brush_space_group();
-    myScreen.add_brush_space(newTargetGroup, {
-        "visual_type": "Vega",
-        "source": "fake",
-        "height": 100,
-        "is_context": true,
-        "vega_spec": vegaSpec__NoYDots
-    });
-    myScreen.add_brush_space(newTargetGroup, {
-        "visual_type": "Vega",
-        "source": "Annotation",
-        "height": 100,
-        "is_context": false,
-        "vega_spec": vegaSpec__NoYDotsText
-    });
+    // myScreen.add_brush_space(newTargetGroup, {
+    //     "visual_type": "Vega",
+    //     "source": "fake",
+    //     "height": 100,
+    //     "is_context": true,
+    //     "vega_spec": vegaSpec__NoYDots
+    // });
+    // myScreen.add_brush_space(newTargetGroup, {
+    //     "visual_type": "Vega",
+    //     "source": "Annotation",
+    //     "height": 100,
+    //     "is_context": false,
+    //     "vega_spec": vegaSpec__NoYDotsText
+    // });
 
     saveScreenDescription();
 }
