@@ -7,9 +7,11 @@ class Screen {
         this.defaultDomain = description["default_domain"].map(function(d) { return new Date(d); });
 
         var that = this;
-        description["small_multiples"].forEach(function(smallMultipleDescription) {
-            that.add_small_multiple(smallMultipleDescription);
-        });
+        if ("small_multiples" in description) {
+            description["small_multiples"].forEach(function(smallMultipleDescription) {
+                that.add_small_multiple(smallMultipleDescription);
+            });
+        }
     }
     toJSON() {
         return {
@@ -34,10 +36,10 @@ class Screen {
     }
     add_brush_space_group(description) {
         // TODO remove this because it doesn't make sense
-        if (this.smallMultiples.length > 0) {
-            return this.smallMultiples[0].add_brush_space_group(description);
+        if (this.smallMultiples.length === 0) {
+            this.add_small_multiple({});
         }
-        return -1;
+        return this.smallMultiples[0].add_brush_space_group(description);
     }
     add_brush_space(brushSpaceTarget, newBrushSpaceJSONDescription) {
         // TODO remove this because it doesn't make sense

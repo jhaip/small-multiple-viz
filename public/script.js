@@ -7,6 +7,7 @@ var myScreen;
 var state = "";
 var dmMaster = undefined;
 var selectedScreenId = undefined;
+var selectedScreenListKey = undefined;
 
 function guid() {
   function s4() {
@@ -93,6 +94,7 @@ $("#submitAddVisual").click(function() {
 });
 
 function createBrushSpaces(dmMaster) {
+    console.log("create brush spaces");
     var newTargetGroup = myScreen.add_brush_space_group();
     myScreen.add_brush_space(newTargetGroup, {
         "visual_type": "Vega",
@@ -122,24 +124,56 @@ function saveScreenDescription() {
 function fetchScreensList() {
     return firebase.database().ref('/screens-list').once('value').then(function(snapshot) {
         var screensList = snapshot.val();
-        for (var i=0; i<screensList.length; i+=1) {
+        var selectScreenYet = false;
+        for (var i in screensList) {
+            if (selectScreenYet === false) {
+                fetchAndShowScreen(screensList[0], i);
+                selectScreenYet = true;
+            }
             $("#screenSelectionDropdown").append($('<option>', {
                 value: screensList[i],
-                text : `Screen ${i}`
+                text : `Screen ${i}`,
+                'data-list-key': i
             }));
         }
         $("#screenSelectionDropdown").change(function(e) {
-            fetchAndShowScreen($(this).val());
+            fetchAndShowScreen($(this).val(), $(this).find(":selected").data("list-key"));
         });
-        if (screensList.length > 0) {
-            fetchAndShowScreen(screensList[0]);
-        }
+        $("#addNewScreen").click(function() {
+            var newScreenId = guid();
+            var newPostRef = firebase.database().ref('/screens-list').push();
+            var newScreenListKey = newPostRef.key;
+            newPostRef.set(newScreenId);
+
+            firebase.database().ref('/screens/' + newScreenId).set({
+                id: newScreenId,
+                default_domain: ["2017-01-25T05:00:00.000Z", "2017-03-03T05:00:00.000Z"],
+                small_multiples: []
+            }).then(function() {
+                $("#screenSelectionDropdown").append($('<option>', {
+                    value: newScreenId,
+                    text : `Screen ${newScreenListKey}`,
+                    "data-list-key": newScreenListKey
+                }));
+                $("#screenSelectionDropdown").val(newScreenId);
+
+                fetchAndShowScreen(newScreenId, newScreenListKey);
+            });
+        });
+        $("#removeCurrentScreen").click(function() {
+            firebase.database().ref('/screens-list/'+selectedScreenListKey).remove().then(function() {
+                firebase.database().ref('/screens/'+selectedScreenId).remove().then(function() {
+                    location.reload();
+                });
+            });
+        });
     });
 }
 
-function fetchAndShowScreen(screenId) {
+function fetchAndShowScreen(screenId, screenListKey) {
     d3.select(".visual-blocks").html("");
     selectedScreenId = screenId;
+    selectedScreenListKey = screenListKey;
     return firebase.database().ref('/screens/' + screenId).once('value').then(function(snapshot) {
         var savedDescription = snapshot.val();
         dmMaster = new DataModuleMaster(dispatch);
