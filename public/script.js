@@ -6,6 +6,7 @@ var update_count = 0;
 var myScreen;
 var state = "";
 var dmMaster = undefined;
+var selectedScreenId = undefined;
 
 function guid() {
   function s4() {
@@ -113,14 +114,32 @@ function createBrushSpaces(dmMaster) {
 
 function saveScreenDescription() {
     var screenDescription = myScreen.toJSON();
-    var screenId = "6dddec24-722c-a8e6-11c9-cfbe5da8892d";
     var updates = {};
-    updates['/screens/' + screenId] = screenDescription;
+    updates['/screens/' + selectedScreenId] = screenDescription;
     return firebase.database().ref().update(updates);
 }
 
-function init() {
-    var screenId = "6dddec24-722c-a8e6-11c9-cfbe5da8892d";
+function fetchScreensList() {
+    return firebase.database().ref('/screens-list').once('value').then(function(snapshot) {
+        var screensList = snapshot.val();
+        for (var i=0; i<screensList.length; i+=1) {
+            $("#screenSelectionDropdown").append($('<option>', {
+                value: screensList[i],
+                text : `Screen ${i}`
+            }));
+        }
+        $("#screenSelectionDropdown").change(function(e) {
+            fetchAndShowScreen($(this).val());
+        });
+        if (screensList.length > 0) {
+            fetchAndShowScreen(screensList[0]);
+        }
+    });
+}
+
+function fetchAndShowScreen(screenId) {
+    d3.select(".visual-blocks").html("");
+    selectedScreenId = screenId;
     return firebase.database().ref('/screens/' + screenId).once('value').then(function(snapshot) {
         var savedDescription = snapshot.val();
         dmMaster = new DataModuleMaster(dispatch);
@@ -128,6 +147,10 @@ function init() {
                               d3.select(".visual-blocks"),
                               savedDescription);
     });
+}
+
+function init() {
+    fetchScreensList();
 }
 
 (function(gapi) {
