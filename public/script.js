@@ -1,7 +1,8 @@
 var dispatch = d3.dispatch("brushchange",
                            "hoverchange",
                            "statechange",
-                           "savedata--Annotation");
+                           "savedata--Annotation",
+                           "delete-brush-space-group");
 var update_count = 0;
 var myScreen;
 var state = "";

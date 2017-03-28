@@ -39,7 +39,7 @@ class Screen {
         if (this.smallMultiples.length === 0) {
             this.add_small_multiple({});
         }
-        return this.smallMultiples[0].add_brush_space_group(description);
+        return this.smallMultiples[0].add_brush_space_group(undefined);
     }
     add_brush_space(brushSpaceTarget, newBrushSpaceJSONDescription) {
         // TODO remove this because it doesn't make sense

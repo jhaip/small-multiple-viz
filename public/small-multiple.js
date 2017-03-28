@@ -24,6 +24,11 @@ class SmallMultiple {
         this.add_labels();
         this.create_resize_control_y();
         this.create_resize_control_x();
+
+        this.dispatch.on("delete-brush-space-group."+this.id, function(e) {
+            console.log(e);
+            that.remove_brush_space_group(e.id);
+        });
     }
     toJSON() {
         return {
@@ -37,6 +42,13 @@ class SmallMultiple {
     resize(width, height) {
         this.width = width;
         this.height = height;
+
+        this.el.style("width", this.width+"px").style("height", this.height+"px");
+
+        var that = this;
+        this.brushSpaceGroups.forEach(function(bsg) {
+            bsg.resize((that.width-125)/that.brushSpaceGroups.length, that.height);
+        });
     }
     create_resize_control_x() {
         var that = this;
@@ -107,7 +119,20 @@ class SmallMultiple {
                     <button type="button" class="btn btn-default btn-xs" style="float: right;"><span class="glyphicon glyphicon-cog" aria-hidden="true" style=""></span> Edit</button>`;
             });
     }
+    remove_brush_space_group(idToRemove) {
+        console.log("I should remove "+idToRemove);
+        console.log(this);
+        this.brushSpaceGroups = this.brushSpaceGroups.filter(function(bsg) {
+            return bsg.id !== idToRemove;
+        });
+        this.resize(this.width, this.height);
+    }
     add_brush_space_group(description) {
+        // Experimental: use existing description of the first brush spaces
+        // as a template for the new brush space but with different IDs
+        if (typeof description === 'undefined' && this.brushSpaceGroups.length > 0) {
+            description = this.brushSpaceGroups[0].toJSONCopy();
+        }
         description = $.extend({
             id: guid(),
             x_domain: this.defaultDomain,
@@ -123,6 +148,7 @@ class SmallMultiple {
                 return bs.source;
             });
         }
+        this.resize(this.width, this.height);
         return this.brushSpaceGroups.length-1;
     }
     add_brush_space(brushSpaceTarget, newBrushSpaceJSONDescription) {

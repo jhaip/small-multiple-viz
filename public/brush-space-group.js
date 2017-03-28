@@ -6,12 +6,26 @@ class BrushSpaceGroup {
         description["x_domain"] = description["x_domain"].map(function(d) { return new Date(d); });
         this.x = d3.scaleTime().domain(description["x_domain"]);
         this.width = description["width"];
+        this.height = description["height"] || 900;
         this.brushSpaces = [];
 
         this.el = this.parent.append("div")
-            .attr("class", "visual-block visual-block--" + this.id);
+            .attr("class", "visual-block visual-block--" + this.id)
+            .style("width", this.width+"px")
+            .style("height", this.height+"px");
         this.el.append("h5")
+            .style("display", "inline-block")
             .text(moment(this.x.domain()[0]).format("M/D H:mm:ss.SSSS") + " - " + moment(this.x.domain()[1]).format("M/D H:mm:ss.SSSS"));
+
+        var that = this;
+        this.el.append("button")
+            .attr("class", "btn btn-default btn-xs")
+            .style("display", "inline-block")
+            .text("X")
+            .on("click", function(e) {
+                that.el.remove();
+                that.dispatch.call("delete-brush-space-group", {}, {id: that.id});
+            });
 
         var that = this;
         description["brush_spaces"].forEach(function(bsDescription) {
@@ -56,14 +70,35 @@ class BrushSpaceGroup {
             groupIndex: this.id
         });
     }
+    resize(width, height) {
+        this.width = width;
+        this.height = height;
+
+        this.el.style("width", this.width+"px").style("height", this.height+"px");
+
+        var that = this;
+        this.brushSpaces.forEach(function(bs) {
+            bs.resize(that.width, bs.container_height);
+        });
+    }
     toJSON() {
         return {
             id: this.id,
             x_domain: this.x.domain(),
             width: this.width,
+            height: this.height,
             brush_spaces: this.brushSpaces.map(function(bs) {
                 return bs.toJSON();
             })
         };
+    }
+    toJSONCopy() {
+        var copyJSON = this.toJSON();
+        copyJSON.id = guid();
+        copyJSON.brush_spaces = copyJSON.brush_spaces.map(function(bs) {
+            bs.group_id = copyJSON.id;
+            return bs;
+        });
+        return copyJSON;
     }
 }

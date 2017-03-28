@@ -75,6 +75,11 @@ class BrushSpace {
             "brush_domain": brush_domain
         }
     }
+    toJSONCopy() {
+        var copyJSON = this.toJSON();
+        copyJSON.id = guid();
+        return copyJSON;
+    }
     create_axes() {
         this.xAxis = d3.axisBottom(this.x);
         this.yAxis = d3.axisLeft(this.y);
@@ -441,7 +446,7 @@ class BrushSpace {
         this.update_scene();
     }
     convert_brush_domain_to_range(domain) {
-        if (typeof domain === 'undefined') {
+        if (typeof domain === 'undefined' || domain === null) {
             return undefined;
         } else {
             return domain.map(this.x, this.x.invert);
