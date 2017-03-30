@@ -1,11 +1,12 @@
 class DataModuleGithubCommits extends DataModule {
     fetch_data(e, defer) {
         var that = this;
+        var auth_token = Cookies.get('smv-github');
         $.ajax({
             type: "GET",
             url: "https://api.github.com/repos/jhaip/small-multiple-viz/commits",
             headers: {
-                "Authorization": "Basic "+btoa("jhaip:TODO")
+                "Authorization": "Basic "+btoa("jhaip:"+auth_token)
             },
             data: {
                 sha: "master",
@@ -34,11 +35,12 @@ class DataModuleGithubCommit extends DataModule {
         }
 
         var that = this;
+        var auth_token = Cookies.get('smv-github');
         $.ajax({
             type: "GET",
             url: "https://api.github.com/repos/jhaip/small-multiple-viz/contents/js/script.js",
             headers: {
-                "Authorization": "Basic "+btoa("jhaip:TODO")
+                "Authorization": "Basic "+btoa("jhaip:"+auth_token)
             },
             data: {
                 ref: e.commit
