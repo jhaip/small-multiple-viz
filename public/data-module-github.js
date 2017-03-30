@@ -10,6 +10,7 @@ class DataModuleGithubCommits extends DataModule {
             },
             data: {
                 sha: "master",
+                path: "photon/blink.ino"
             }
         }).done(function(commits) {
             that.data = [];
@@ -38,7 +39,7 @@ class DataModuleGithubCommit extends DataModule {
         var auth_token = Cookies.get('smv-github');
         $.ajax({
             type: "GET",
-            url: "https://api.github.com/repos/jhaip/small-multiple-viz/contents/js/script.js",
+            url: "https://api.github.com/repos/jhaip/small-multiple-viz/contents/photon/blink.ino",
             headers: {
                 "Authorization": "Basic "+btoa("jhaip:"+auth_token)
             },
