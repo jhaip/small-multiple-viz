@@ -9,13 +9,38 @@ class BrushSpaceGroup {
         this.height = description["height"] || 900;
         this.brushSpaces = [];
 
+        var that = this;
         this.el = this.parent.append("div")
             .attr("class", "visual-block visual-block--" + this.id)
             .style("width", this.width+"px")
             .style("height", this.height+"px");
-        this.el.append("h5")
-            .style("display", "inline-block")
-            .text(moment(this.x.domain()[0]).format("M/D H:mm:ss.SSSS") + " - " + moment(this.x.domain()[1]).format("M/D H:mm:ss.SSSS"));
+        var form_group = this.el.append("div");
+        form_group.attr("class", "bsg-times-group");
+        form_group.append("input")
+            .attr("type", "text")
+            .attr("class", "bsg-times bsg-start-time--"+this.id)
+            .property("value", moment(this.x.domain()[0]).format("M/D H:mm:ss.SSSS"))
+            .on("keyup", function(e) {
+                if (d3.event["key"] === "Enter") {
+                    var newTime = moment(this.value);
+                    if (newTime.isValid()) {
+                        that.update_domain([newTime.toDate(), that.x.domain()[1]]);
+                    }
+                }
+            });
+        form_group.append("span").text(" to ");
+        form_group.append("input")
+            .attr("type", "text")
+            .attr("class", "bsg-times bsg-end-time--"+this.id)
+            .property("value", moment(this.x.domain()[1]).format("M/D H:mm:ss.SSSS"))
+            .on("keyup", function(e) {
+                if (d3.event["key"] === "Enter") {
+                    var newTime = moment(this.value);
+                    if (newTime.isValid()) {
+                        that.update_domain([that.x.domain()[0], newTime.toDate()]);
+                    }
+                }
+            });
 
         var that = this;
         this.el.append("button")
@@ -67,7 +92,8 @@ class BrushSpaceGroup {
             domain: this.x.domain(),
             source: "",
             iscontext: false,
-            groupIndex: this.id
+            groupIndex: this.id,
+            override: true
         });
     }
     resize(width, height) {

@@ -456,7 +456,9 @@ class BrushSpace {
         if (e.groupIndex !== this.groupIndex) return;
         if (this.updatingBrushStack.length !== 0) return;
         this.push_to_updating_stack();
-        if (this.id !== e.source) {
+        if (e.override) {
+            this.update_domain(e.domain);
+        } else if (this.id !== e.source) {
             if (this.isContext && e.domain[0] >= this.x.domain()[0] && e.domain[1] <= this.x.domain()[1]) {
                 var r = this.convert_brush_domain_to_range(e.domain);
                 this.brush.move(this.context.select(".brush"), r);
