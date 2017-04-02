@@ -78,6 +78,10 @@ class BrushSpaceGroup {
             newBrushSpace = new BrushSpaceVideoFeed(dispatch,
                                                      dmMaster,
                                                      newBrushSpaceJSONDescription);
+        } else if (newBrushSpaceJSONDescription["visual_type"] === "Livestream") {
+            newBrushSpace = new BrushSpaceLivestream(dispatch,
+                                                     dmMaster,
+                                                     newBrushSpaceJSONDescription);
         } else if (newBrushSpaceJSONDescription["visual_type"] === "Base") {
             newBrushSpace = new BrushSpace(dispatch,
                                            dmMaster,
