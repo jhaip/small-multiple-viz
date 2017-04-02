@@ -27,7 +27,8 @@ class DataModule {
         if (typeof defer === 'undefined') {
             defer = $.Deferred();
         }
-        if (e.domain[0] < this.scale.domain()[0] || e.domain[1] > this.scale.domain()[1]) {
+        if (e.domain[0] < this.scale.domain()[0] || e.domain[1] > this.scale.domain()[1] || e.ignorecache) {
+            e.ignorecache = false; // remove property to avoid a loop
             this.fetch_data(e, defer);
             return defer.promise();
         }

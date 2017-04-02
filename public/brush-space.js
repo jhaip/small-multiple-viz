@@ -433,9 +433,18 @@ class BrushSpace {
     fetch_data() {
         var that = this;
         if (this.source) {
-            this.dataModuleMaster.fetch_data(this.source, this.x.domain()).done(function(data) {
+            var ignorecache = (that.source === "ParticleEvent") ? true : false;  // HACK TODO remove
+            this.dataModuleMaster.fetch_data(this.source, this.x.domain(), ignorecache).done(function(data) {
                 that.data = data;
                 that.update_scene();
+
+                // HACK version of long polling for demo
+                if (that.source === "ParticleEvent") {
+                    console.log("fetching new data");
+                    setTimeout(function() {
+                        that.fetch_data();
+                    }, 5000);
+                }
             }).fail(function(e) {
                 console.log("Error fetching data from "+this.id+" for source "+this.source);
             })

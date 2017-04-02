@@ -15,7 +15,7 @@ class DataModuleMaster {
             "VideoFeed": dmVideoFeed
         }
     }
-    fetch_data(source, domain) {
-        return this.dmMap[source].get_data({"domain": domain});
+    fetch_data(source, domain, ignorecache = false) {
+        return this.dmMap[source].get_data({"domain": domain, "ignorecache": ignorecache});
     }
 }
