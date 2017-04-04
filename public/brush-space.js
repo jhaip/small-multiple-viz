@@ -439,7 +439,7 @@ class BrushSpace {
                 that.update_scene();
 
                 // HACK version of long polling for demo
-                if (that.source === "ParticleEvent") {
+                if (that.source === "ParticleEvent" && $(that.container_el.node()).is(":visible")) {
                     console.log("fetching new data");
                     setTimeout(function() {
                         that.fetch_data();
