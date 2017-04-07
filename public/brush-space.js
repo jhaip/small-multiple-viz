@@ -101,24 +101,24 @@ class BrushSpace {
             .call(this.yAxis);
     }
     create_scene_label() {
-        // var that = this;
-        // this.label_el = this.container_el.append("div")
-        //     .attr("class", "clearfix")
-        //     .style("width", "100%");
-        // this.label_el.append("span")
-        //     .attr("class", "bs-el-container-label bs-el-container-label--"+this.id)
-        //     .style("float", "left")
-        //     .text("Source: "+this.source+" -- ID: "+this.id.substring(0,8));
-        // this.label_el.append("span")
-        //     .style("float", "right")
-        //     .html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Edit</button>')
-        //     .on("click", function(e) {
-        //         $("#saveVisualEdits").off();
-        //         $("#saveVisualEdits").on("click", function() {
-        //             that.save_config_edits();
-        //         })
-        //         that.open_config();
-        //     });
+        var that = this;
+        this.label_el = this.container_el.append("div")
+            .attr("class", "clearfix")
+            .style("width", "100%");
+        this.label_el.append("span")
+            .attr("class", "bs-el-container-label bs-el-container-label--"+this.id)
+            .style("float", "left")
+            .text("Source: "+this.source+" -- ID: "+this.id.substring(0,8));
+        this.label_el.append("span")
+            .style("float", "right")
+            .html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Edit</button>')
+            .on("click", function(e) {
+                $("#saveVisualEdits").off();
+                $("#saveVisualEdits").on("click", function() {
+                    that.save_config_edits();
+                })
+                that.open_config();
+            });
     }
     open_config() {
         $("#editVisualModal_sources-list").val(this.source);

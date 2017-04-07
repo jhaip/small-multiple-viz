@@ -53,22 +53,12 @@ d3.select("body").on("keydown", function() {
     }
 });
 
-// $("#addTime").click(function() {
-//     myScreen.add_time();
-//     saveScreenDescription();
-// });
-
 $("#saveScreenDescription").click(function() {
     saveScreenDescription();
 });
 
 $("#btn-add-group").click(function() {
     createBrushSpaces(dmMaster);
-    // newBrushSpaceGroupOption = myScreen.brushSpaceGroups.length-1;
-    // $("#dropdownAddNewVisualToGroup").append($('<option>', {
-    //     value: newBrushSpaceGroupOption,
-    //     text: newBrushSpaceGroupOption
-    // }));
 });
 
 $("#vegaSpec").text(JSON.stringify(vegaSpec__Area, undefined, 4));
@@ -97,21 +87,6 @@ $("#submitAddVisual").click(function() {
 function createBrushSpaces(dmMaster) {
     console.log("create brush spaces");
     var newTargetGroup = myScreen.add_brush_space_group();
-    // myScreen.add_brush_space(newTargetGroup, {
-    //     "visual_type": "Vega",
-    //     "source": "fake",
-    //     "height": 100,
-    //     "is_context": true,
-    //     "vega_spec": vegaSpec__NoYDots
-    // });
-    // myScreen.add_brush_space(newTargetGroup, {
-    //     "visual_type": "Vega",
-    //     "source": "Annotation",
-    //     "height": 100,
-    //     "is_context": false,
-    //     "vega_spec": vegaSpec__NoYDotsText
-    // });
-
     saveScreenDescription();
 }
 
@@ -149,7 +124,7 @@ function fetchScreensList() {
             firebase.database().ref('/screens/' + newScreenId).set({
                 id: newScreenId,
                 default_domain: ["2017-01-25T05:00:00.000Z", "2017-03-03T05:00:00.000Z"],
-                small_multiples: []
+                brush_space_groups: []
             }).then(function() {
                 $("#screenSelectionDropdown").append($('<option>', {
                     value: newScreenId,

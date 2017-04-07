@@ -3,48 +3,92 @@ class Screen {
         this.dispatch = dispatch;
         this.parent = parent;
         this.id = description["id"];
-        this.smallMultiples = [];
+        this.brushSpaceGroups = [];
         this.defaultDomain = description["default_domain"].map(function(d) { return new Date(d); });
 
+        this.el = this.parent.append("div")
+            .attr("class", "small-multiple small-multiple-"+this.id)
+            .style("width", "100%")
+            .style("height", "90vh")
+            .style("background-color", "#FAFAFF");
+        this.visual_container = this.el.append("div")
+            .attr("class", "clearfix");
+
         var that = this;
-        if ("small_multiples" in description) {
-            description["small_multiples"].forEach(function(smallMultipleDescription) {
-                that.add_small_multiple(smallMultipleDescription);
+
+        if ("brush_space_groups" in description) {
+            description["brush_space_groups"].forEach(function(bsgDescription) {
+                that.add_brush_space_group(bsgDescription);
             });
         }
+
+        $(window).resize(function() {
+            that.resize();
+        });
+
+        this.dispatch.on("delete-brush-space-group."+this.id, function(e) {
+            console.log(e);
+            that.remove_brush_space_group(e.id);
+        });
     }
     toJSON() {
         return {
             id: this.id,
             default_domain: this.defaultDomain,
-            small_multiples: this.smallMultiples.map(function(sm) { return sm.toJSON(); })
+            brush_space_groups: this.brushSpaceGroups.map(function(bsg) { return bsg.toJSON(); })
         };
     }
-    add_small_multiple(description) {
-        description = $.extend({
-            id: guid(),
-            default_domain: this.defaultDomain,
-            width: 1000,
-            height: 1000,
-            brush_space_groups: []
-        }, description);
-        var newSmallMultiple = new SmallMultiple(this.dispatch,
-                                                 this.parent,
-                                                 description);
-        this.smallMultiples.push(newSmallMultiple);
-        return this.smallMultiples.length-1;
+    resize() {
+        var that = this;
+        var w = $(this.el.node()).width();
+        var h = $(this.el.node()).height();
+        this.brushSpaceGroups.forEach(function(bsg) {
+            bsg.resize((w)/that.brushSpaceGroups.length, h);
+        });
+    }
+    remove_brush_space_group(idToRemove) {
+        console.log("I should remove "+idToRemove);
+        console.log(this);
+        this.brushSpaceGroups = this.brushSpaceGroups.filter(function(bsg) {
+            return bsg.id !== idToRemove;
+        });
+        this.resize();
     }
     add_brush_space_group(description) {
-        // TODO remove this because it doesn't make sense
-        if (this.smallMultiples.length === 0) {
-            this.add_small_multiple({});
+        // Experimental: use existing description of the first brush spaces
+        // as a template for the new brush space but with different IDs
+        if (typeof description === 'undefined' && this.brushSpaceGroups.length > 0) {
+            description = this.brushSpaceGroups[0].toJSONCopy();
         }
-        return this.smallMultiples[0].add_brush_space_group(undefined);
+        description = $.extend({
+            id: guid(),
+            x_domain: this.defaultDomain,
+            width: 500,
+            brush_spaces: []
+        }, description);
+        var newBrushSpaceGroup = new BrushSpaceGroup(this.dispatch,
+                                                     this.visual_container,
+                                                     description);
+        this.brushSpaceGroups.push(newBrushSpaceGroup);
+        this.resize();
+        return this.brushSpaceGroups.length-1;
     }
     add_brush_space(brushSpaceTarget, newBrushSpaceJSONDescription) {
-        // TODO remove this because it doesn't make sense
-        if (this.smallMultiples.length > 0) {
-            this.smallMultiples[0].add_brush_space(brushSpaceTarget, newBrushSpaceJSONDescription);
+        var groupsToAddVisualTo = this.brushSpaceGroups;
+        if (brushSpaceTarget !== "All Groups") {
+            groupsToAddVisualTo = [this.brushSpaceGroups[parseInt(brushSpaceTarget)]];
         }
+        for (let i=0; i<groupsToAddVisualTo.length; i+=1) {
+            groupsToAddVisualTo[i].add_brush_space(newBrushSpaceJSONDescription);
+        }
+    }
+    update_domain(newDomain) {
+        for (var i=0; i<this.brushSpaceGroups.length; i+=1) {
+            this.brushSpaceGroups[i].update_domain(newDomain);
+        }
+    }
+    add_time() {
+        this.defaultDomain[1] = new Date(this.defaultDomain[1].getTime()+1000*60*60*24*30);
+        this.update_domain(this.defaultDomain);
     }
 }
