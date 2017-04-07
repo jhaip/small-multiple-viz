@@ -68,7 +68,13 @@ class DataModuleGoogleDatastore extends DataModule {
                     if (x.entity.properties.data.stringValue !== "START") {
                         var t = new Date(x.entity.properties.published_at.timestampValue);
                         t = d3.isoFormat(t);
-                        that.data.push({"u": t, "v": parseInt(x.entity.properties.data.integerValue)});
+                        var v = "COULDN'T PARSE";
+                        if ("integerValue" in x.entity.properties.data) {
+                            v = parseInt(x.entity.properties.data.integerValue);
+                        } else if ("stringValue" in x.entity.properties.data) {
+                            v = parseInt(x.entity.properties.data.stringValue);
+                        }
+                        that.data.push({"u": t, "v": v});
                     }
                 }
                 that.scale.domain(e.domain);
