@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link href="prism.css" rel="stylesheet" />
+        <style>
+            body {
+                /* offset for top navbar */
+                padding-top: 60px;
+                background-color: #EAEAEA;
+            }
+            .btn.navbar-right {
+                margin-right: 10px;
+            }
+            .screens,
+            .brush-space-groups {
+                margin: 20px;
+            }
+            .brush-space-group-list--item,
+            .screen-list--item {
+                padding: 20px;
+                background-color: white;
+                border-bottom: 1px solid #EEE;
+            }
+            .brush-space-group-list--item:hover,
+            .screen-list--item:hover {
+                background-color: #FFC;
+            }
+        </style>
+    </head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="/">
+              <a class="navbar-brand" href="/">Small Multiple Viz</a>
+            </a>
+          </div>
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-5">
+              TODO
+          </div>
+        </div>
+    </nav>
+
+    <div class="brush-space-groups">
+        <h3>Brush Space Groups</h1>
+        <div class="brush-space-group-list"></div>
+    </div>
+
+    <div class="screens">
+        <h3>Screens</h1>
+        <div class="screen-list"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="vega.js"></script>
+    <script src="prism.js"></script>
+    <script src="moment.js"></script>
+    <script src="js.cookie.js"></script>
+    <script src="list-page.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.7.2/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyD1qRhXFoSvC8Wj0oZ_Ww5WLJxptt-HTgE",
+        authDomain: "photon-data-collection.firebaseapp.com",
+        databaseURL: "https://photon-data-collection.firebaseio.com",
+        storageBucket: "photon-data-collection.appspot.com",
+        messagingSenderId: "378739939891"
+      };
+      firebase.initializeApp(config);
+
+      var database = firebase.database();
+    </script>
+</body>
+</html>
