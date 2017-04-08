@@ -94,6 +94,9 @@ function saveScreenDescription() {
     var screenDescription = myScreen.toJSON();
     var updates = {};
     updates['/screens/' + selectedScreenId] = screenDescription;
+    myScreen.brushSpaceGroups.forEach(function(bsg) {
+        updates['/brush_space_groups/'+bsg.id] = bsg.toJSON();
+    });
     return firebase.database().ref().update(updates);
 }
 

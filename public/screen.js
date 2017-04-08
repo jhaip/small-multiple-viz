@@ -18,7 +18,10 @@ class Screen {
 
         if ("brush_space_groups" in description) {
             description["brush_space_groups"].forEach(function(bsgDescription) {
-                that.add_brush_space_group(bsgDescription);
+                firebase.database().ref('/brush_space_groups/' + bsgDescription).once('value').then(function(snapshot) {
+                    var savedDescription = snapshot.val();
+                    that.add_brush_space_group(savedDescription);
+                });
             });
         }
 
@@ -35,7 +38,7 @@ class Screen {
         return {
             id: this.id,
             default_domain: this.defaultDomain,
-            brush_space_groups: this.brushSpaceGroups.map(function(bsg) { return bsg.toJSON(); })
+            brush_space_groups: this.brushSpaceGroups.map(function(bsg) { return bsg.id; })
         };
     }
     resize() {
