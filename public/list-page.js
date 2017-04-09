@@ -1,11 +1,15 @@
 function fetchScreensList() {
     return firebase.database().ref('/screens-list').once('value').then(function(snapshot) {
         var screensList = snapshot.val();
-        for (var i in screensList) {
-            d3.select(".screen-list").append("div")
-                .attr("class", "screen-list--item")
-                .text(screensList[i]);
-        }
+        d3.select(".screen-list")
+            .selectAll("screen-list--item")
+            .data(d3.entries(screensList))
+            .enter().append("div")
+            .attr("class", "screen-list--item")
+            .text(function(d) { return d.value; })
+            .on("click", function(d) {
+                window.location = "./?screen="+d.value;
+            });
     });
 }
 

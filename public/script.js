@@ -100,23 +100,39 @@ function saveScreenDescription() {
     return firebase.database().ref().update(updates);
 }
 
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
 function fetchScreensList() {
     return firebase.database().ref('/screens-list').once('value').then(function(snapshot) {
         var screensList = snapshot.val();
         var selectScreenYet = false;
         for (var i in screensList) {
-            if (selectScreenYet === false) {
-                fetchAndShowScreen(screensList[0], i);
-                selectScreenYet = true;
-            }
             $("#screenSelectionDropdown").append($('<option>', {
                 value: screensList[i],
                 text : `Screen ${i}`,
                 'data-list-key': i
             }));
+            if (screensList[i] == getParameterByName('screen')) {
+                fetchAndShowScreen(screensList[i], i);
+                selectScreenYet = true;
+            }
+        }
+        if (selectScreenYet === false) {
+            fetchAndShowScreen(screensList[0], 0);
         }
         $("#screenSelectionDropdown").change(function(e) {
             fetchAndShowScreen($(this).val(), $(this).find(":selected").data("list-key"));
+            history.pushState("", "", "./?screen="+$(this).val());
         });
         $("#addNewScreen").click(function() {
             var newScreenId = guid();
@@ -146,11 +162,16 @@ function fetchScreensList() {
                 });
             });
         });
+        $("#clearCurrentScreen").click(function() {
+            myScreen.clear();
+            saveScreenDescription();
+        });
     });
 }
 
 function fetchAndShowScreen(screenId, screenListKey) {
     d3.select(".visual-blocks").html("");
+    d3.select("#screenSelectionDropdown").property("value", screenId);
     selectedScreenId = screenId;
     selectedScreenListKey = screenListKey;
     return firebase.database().ref('/screens/' + screenId).once('value').then(function(snapshot) {

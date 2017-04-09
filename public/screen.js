@@ -41,6 +41,10 @@ class Screen {
             brush_space_groups: this.brushSpaceGroups.map(function(bsg) { return bsg.id; })
         };
     }
+    clear() {
+        this.brushSpaceGroups = [];
+        this.visual_container.html("");
+    }
     resize() {
         var that = this;
         var w = $(this.el.node()).width();
