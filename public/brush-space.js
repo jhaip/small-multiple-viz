@@ -437,14 +437,6 @@ class BrushSpace {
             this.dataModuleMaster.fetch_data(this.source, this.x.domain(), ignorecache).done(function(data) {
                 that.data = data;
                 that.update_scene();
-
-                // HACK version of long polling for demo
-                if (that.source === "ParticleEvent" && $(that.container_el.node()).is(":visible")) {
-                    console.log("fetching new data");
-                    setTimeout(function() {
-                        that.fetch_data();
-                    }, 5000);
-                }
             }).fail(function(e) {
                 console.log("Error fetching data from "+this.id+" for source "+this.source);
             })

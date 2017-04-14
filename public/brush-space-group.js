@@ -7,6 +7,7 @@ class BrushSpaceGroup {
         this.width = description["width"];
         this.height = description["height"] || 900;
         this.brushSpaces = [];
+        this.updatingBrushStack = new Array();
 
         var that = this;
         this.el = this.parent.append("div")
@@ -67,6 +68,13 @@ class BrushSpaceGroup {
         this.dispatch.on("brushchange."+this.id, function(e) {
             that.brush_change(e);
         });
+        this.update_domain(this.domain, true);
+    }
+    push_to_updating_stack() {
+        this.updatingBrushStack.push("true");
+    }
+    pop_off_updating_stack() {
+        this.updatingBrushStack.pop();
     }
     brush_change(e) {
         if (e.groupIndex !== this.id) return;
@@ -127,7 +135,11 @@ class BrushSpaceGroup {
         return [start, end];
     }
     update_domain(newDomain, ignore_dispatch) {
-        console.log("update domain");
+        if (this.updatingBrushStack.length > 0) return;
+
+        this.push_to_updating_stack();
+        console.log("update domain "+this.id);
+        var that = this;
         this.domain = newDomain;
         d3.select(".bsg-start-time--"+this.id).property("value", this.domain[0]);
         d3.select(".bsg-end-time--"+this.id).property("value", this.domain[0]);
@@ -141,6 +153,15 @@ class BrushSpaceGroup {
                 override: true
             });
         }
+
+        if (this.domain[1] === "now") {
+            console.log("long poll in "+this.id);
+            setTimeout(function() {
+                that.update_domain(that.domain);
+            }, 5000);
+        }
+
+        this.pop_off_updating_stack();
     }
     resize(width, height) {
         this.width = width;
