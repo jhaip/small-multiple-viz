@@ -3,8 +3,7 @@ class BrushSpaceGroup {
         this.dispatch = dispatch;
         this.parent = parent;
         this.id = description["id"];
-        description["x_domain"] = description["x_domain"].map(function(d) { return new Date(d); });
-        this.x = d3.scaleTime().domain(description["x_domain"]);
+        this.domain = description["x_domain"];
         this.width = description["width"];
         this.height = description["height"] || 900;
         this.brushSpaces = [];
@@ -19,12 +18,16 @@ class BrushSpaceGroup {
         form_group.append("input")
             .attr("type", "text")
             .attr("class", "bsg-times bsg-start-time--"+this.id)
-            .property("value", moment(this.x.domain()[0]).format("M/D H:mm:ss.SSSS"))
+            .property("value", function() {
+                var m = moment(that.domain[0]);
+                if (m.isValid()) { return m.toDate(); }
+                return that.domain[0];
+            })
             .on("keyup", function(e) {
                 if (d3.event["key"] === "Enter") {
-                    var newTime = moment(this.value);
-                    if (newTime.isValid()) {
-                        that.update_domain([newTime.toDate(), that.x.domain()[1]]);
+                    that.update_domain([this.value, that.domain[1]]);
+                    if (that.get_date_domain()[0] === null) {
+                        console.log("TODO: show error for bad date");
                     }
                 }
             });
@@ -32,12 +35,16 @@ class BrushSpaceGroup {
         form_group.append("input")
             .attr("type", "text")
             .attr("class", "bsg-times bsg-end-time--"+this.id)
-            .property("value", moment(this.x.domain()[1]).format("M/D H:mm:ss.SSSS"))
+            .property("value", function() {
+                var m = moment(that.domain[1]);
+                if (m.isValid()) { return m.toDate(); }
+                return that.domain[1];
+            })
             .on("keyup", function(e) {
                 if (d3.event["key"] === "Enter") {
-                    var newTime = moment(this.value);
-                    if (newTime.isValid()) {
-                        that.update_domain([that.x.domain()[0], newTime.toDate()]);
+                    that.update_domain([that.domain[0], this.value]);
+                    if (that.get_date_domain()[1] === null) {
+                        console.log("TODO: show error for bad date");
                     }
                 }
             });
@@ -56,13 +63,21 @@ class BrushSpaceGroup {
         description["brush_spaces"].forEach(function(bsDescription) {
             that.add_brush_space(bsDescription);
         });
+
+        this.dispatch.on("brushchange."+this.id, function(e) {
+            that.brush_change(e);
+        });
+    }
+    brush_change(e) {
+        if (e.groupIndex !== this.id) return;
+        this.update_domain(e.domain, true);
     }
     add_brush_space(newBrushSpaceJSONDescription) {
         newBrushSpaceJSONDescription = $.extend({
             id: guid(),
             group_id: this.id,
             width: this.width,
-            x_domain: this.x.domain(),
+            x_domain: this.get_date_domain(),
             parent: this.el // TODO this seems wrong because the toJSON doesn't include it
         }, newBrushSpaceJSONDescription);
         var newBrushSpace;
@@ -89,16 +104,43 @@ class BrushSpaceGroup {
         }
         this.brushSpaces.push(newBrushSpace);
     }
-    update_domain(newDomain) {
-        this.x.domain(newDomain);
-        this.dispatch.call("brushchange", {}, {
-            range: [0,1],
-            domain: this.x.domain(),
-            source: "",
-            iscontext: false,
-            groupIndex: this.id,
-            override: true
-        });
+    get_date_from_str(str) {
+        var m = moment(str);
+        if (m.isValid()) {
+            return m.toDate();
+        }
+        if (str.toLowerCase() === "now") {
+            return new Date();
+        }
+        var re = /-(\d+)d/;
+        var dateOffset = str.match(re);
+        if (dateOffset && dateOffset[1]) {
+            return moment().subtract(parseInt(dateOffset[1]), 'days').toDate();
+        }
+        console.error("Could not parse date str");
+        console.error(str);
+        return null;
+    }
+    get_date_domain() {
+        var start = this.get_date_from_str(this.domain[0]);
+        var end = this.get_date_from_str(this.domain[1]);
+        return [start, end];
+    }
+    update_domain(newDomain, ignore_dispatch) {
+        console.log("update domain");
+        this.domain = newDomain;
+        d3.select(".bsg-start-time--"+this.id).property("value", this.domain[0]);
+        d3.select(".bsg-end-time--"+this.id).property("value", this.domain[0]);
+        if (!ignore_dispatch) {
+            this.dispatch.call("brushchange", {}, {
+                range: [0,1],
+                domain: this.get_date_domain(),
+                source: "",
+                iscontext: false,
+                groupIndex: this.id,
+                override: true
+            });
+        }
     }
     resize(width, height) {
         this.width = width;
@@ -114,7 +156,7 @@ class BrushSpaceGroup {
     toJSON() {
         return {
             id: this.id,
-            x_domain: this.x.domain(),
+            x_domain: this.domain,
             width: this.width,
             height: this.height,
             brush_spaces: this.brushSpaces.map(function(bs) {

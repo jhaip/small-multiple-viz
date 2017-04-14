@@ -62,10 +62,8 @@ class Screen {
         this.resize();
     }
     add_brush_space_group(description) {
-        // Experimental: use existing description of the first brush spaces
-        // as a template for the new brush space but with different IDs
-        if (typeof description === 'undefined' && this.brushSpaceGroups.length > 0) {
-            description = this.brushSpaceGroups[0].toJSONCopy();
+        if (typeof description === 'undefined') {
+            description = {x_domain: [new Date(), "now"]};
         }
         description = $.extend({
             id: guid(),
