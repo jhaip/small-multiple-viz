@@ -111,6 +111,17 @@
             .bsg-times-group, .bsg-times {
                 display: inline-block;
             }
+            .bsg-times {
+                transition: border-color 0.5s ease;
+                border-color: #EEE;
+            }
+            .bsg-times.flash {
+                border-color: red;
+            }
+
+            .testNotes {
+                color: blue;
+            }
 
             #remote-media {
                 height: 100%;
@@ -130,6 +141,7 @@
           </div>
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-5">
               <p class="navbar-text state-title">State: <span class="state"></span></p>
+              <button type="button" class="btn btn-default navbar-btn navbar-right" id="btn-end-test" data-toggle="modal" data-target="#endTestModal">End</button>
               <button type="button" class="btn btn-default navbar-btn navbar-right" id="btn-add-group">Add Group</button>
               <button type="button" class="btn btn-default navbar-btn navbar-right" id="btn-add-visual" data-toggle="modal" data-target="#newVisualModal">Add Visual</button>
               <button type="button" class="btn btn-default navbar-btn navbar-right" id="saveScreenDescription">Save</button>
@@ -242,6 +254,30 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-primary" id="saveVisualEdits">Save Edits</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="endTestModal" tabindex="-1" role="dialog" aria-labelledby="endTestModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">End Test</h4>
+      </div>
+      <div class="modal-body">
+          <div>
+              <h3>Wat happened during this test?</h3>
+              <div class="form-group">
+                  <label for="vegaSpec">Test Run Notes:</label>
+                  <textarea class="form-control" rows="5" id="endTestModal_testNotes"></textarea>
+              </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="endTestModal_endTestButton">End Test</button>
       </div>
     </div>
   </div>

@@ -61,6 +61,13 @@ $("#btn-add-group").click(function() {
     createBrushSpaces(dmMaster);
 });
 
+$("#endTestModal_endTestButton").click(function() {
+    var testNotes = $("#endTestModal_testNotes").val();
+    myScreen.end_tests(testNotes);
+    $('#endTestModal').modal('hide');
+    saveScreenDescription();
+});
+
 $("#vegaSpec").text(JSON.stringify(vegaSpec__Area, undefined, 4));
 $("#submitAddVisual").click(function() {
     var targetGroup = $("#dropdownAddNewVisualToGroup").val();

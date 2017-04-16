@@ -15,11 +15,12 @@ function fetchScreensList() {
 
 function fetchBrushSpaceGroupList() {
     return firebase.database().ref('/brush_space_groups').once('value').then(function(snapshot) {
-        var screensList = snapshot.val();
-        for (var i in screensList) {
+        var collection = snapshot.val();
+        for (var i in collection) {
+            var notes = collection[i].notes || "";
             d3.select(".brush-space-group-list").append("div")
                 .attr("class", "brush-space-group-list--item")
-                .text(screensList[i].id);
+                .html(`<p>${collection[i].id}</p><p style="color: blue">${notes}</p>`);
         }
     });
 }

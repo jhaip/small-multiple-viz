@@ -69,6 +69,13 @@ class BrushSpaceGroup {
             that.brush_change(e);
         });
         this.update_domain(this.domain, true);
+
+        this.testNotes = description["notes"] || "";
+        this.el.selectAll(".testNotes--"+this.id)
+            .data([this.testNotes])
+            .enter().append("div")
+            .attr("class", "testNotes testNotes--"+this.id)
+            .text(function(d) { return "Notes: "+d; });
     }
     push_to_updating_stack() {
         this.updatingBrushStack.push("true");
@@ -139,10 +146,11 @@ class BrushSpaceGroup {
 
         this.push_to_updating_stack();
         console.log("update domain "+this.id);
+        console.log(newDomain);
         var that = this;
         this.domain = newDomain;
         d3.select(".bsg-start-time--"+this.id).property("value", this.domain[0]);
-        d3.select(".bsg-end-time--"+this.id).property("value", this.domain[0]);
+        d3.select(".bsg-end-time--"+this.id).property("value", this.domain[1]);
         if (!ignore_dispatch) {
             this.dispatch.call("brushchange", {}, {
                 range: [0,1],
@@ -157,11 +165,33 @@ class BrushSpaceGroup {
         if (this.domain[1] === "now") {
             console.log("long poll in "+this.id);
             setTimeout(function() {
-                that.update_domain(that.domain);
+                // check that domain end is still now
+                if (that.domain[1] === "now") {
+                    $(".bsg-end-time--"+that.id).addClass("flash");
+                    setTimeout(function() {
+                        $(".bsg-end-time--"+that.id).removeClass("flash");
+                    }, 500);
+                    that.update_domain(that.domain);
+                }
             }, 5000);
         }
 
         this.pop_off_updating_stack();
+    }
+    end(testNotes) {
+        if (this.domain[1] === "now") {
+            this.testNotes = testNotes;
+
+            var testNotesDisplay = this.el.selectAll(".testNotes--"+this.id)
+                .data([this.testNotes]);
+            testNotesDisplay.enter().append("div")
+                .attr("class", "testNotes testNotes--"+this.id)
+                .merge(testNotesDisplay)
+                    .text(function(d) { return "Notes: "+d; });
+
+            this.domain[1] = this.get_date_domain()[1];
+            this.update_domain(this.domain);
+        }
     }
     resize(width, height) {
         this.width = width;
@@ -182,7 +212,8 @@ class BrushSpaceGroup {
             height: this.height,
             brush_spaces: this.brushSpaces.map(function(bs) {
                 return bs.toJSON();
-            })
+            }),
+            notes: this.testNotes
         };
     }
     toJSONCopy() {

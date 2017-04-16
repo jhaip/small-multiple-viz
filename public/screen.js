@@ -92,6 +92,11 @@ class Screen {
             this.brushSpaceGroups[i].update_domain(newDomain);
         }
     }
+    end_tests(testNotes) {
+        for (var i=0; i<this.brushSpaceGroups.length; i+=1) {
+            this.brushSpaceGroups[i].end(testNotes);
+        }
+    }
     add_time() {
         this.defaultDomain[1] = new Date(this.defaultDomain[1].getTime()+1000*60*60*24*30);
         this.update_domain(this.defaultDomain);
