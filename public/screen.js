@@ -62,8 +62,10 @@ class Screen {
         this.resize();
     }
     add_brush_space_group(description) {
+        var addBrushSpaceGroupClone = false;
         if (typeof description === 'undefined') {
             description = {x_domain: [new Date(), "now"]};
+            addBrushSpaceGroupClone = true;
         }
         description = $.extend({
             id: guid(),
@@ -74,6 +76,17 @@ class Screen {
         var newBrushSpaceGroup = new BrushSpaceGroup(this.dispatch,
                                                      this.visual_container,
                                                      description);
+
+        if (addBrushSpaceGroupClone && this.brushSpaceGroups.length > 0) {
+            var copyJSON = this.brushSpaceGroups[this.brushSpaceGroups.length-1].toJSONCopy();
+            copyJSON.brush_spaces.forEach(function(bs) {
+                bs.group_id = newBrushSpaceGroup.id;
+                // maybe TODO: bs.domain = description.x_domain
+                newBrushSpaceGroup.add_brush_space(bs);
+            });
+            newBrushSpaceGroup.update_domain(description.x_domain);
+        }
+
         this.brushSpaceGroups.push(newBrushSpaceGroup);
         this.resize();
         return this.brushSpaceGroups.length-1;

@@ -111,6 +111,13 @@ class BrushSpace {
             .text("Source: "+this.source+" -- ID: "+this.id.substring(0,8));
         this.label_el.append("span")
             .style("float", "right")
+            .html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>')
+            .on("click", function(e) {
+                that.container_el.remove();
+                that.dispatch.call("delete-brush-space", {}, {id: that.id});
+            });
+        this.label_el.append("span")
+            .style("float", "right")
             .html('<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Edit</button>')
             .on("click", function(e) {
                 $("#saveVisualEdits").off();

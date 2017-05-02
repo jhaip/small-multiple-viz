@@ -65,6 +65,9 @@ class BrushSpaceGroup {
             that.add_brush_space(bsDescription);
         });
 
+        this.dispatch.on("delete-brush-space."+this.id, function(e) {
+            that.remove_brush_space(e.id);
+        });
         this.dispatch.on("brushchange."+this.id, function(e) {
             that.brush_change(e);
         });
@@ -86,6 +89,13 @@ class BrushSpaceGroup {
     brush_change(e) {
         if (e.groupIndex !== this.id) return;
         this.update_domain(e.domain, true);
+    }
+    remove_brush_space(idToRemove) {
+        console.log("REMOVING BRUSH SPACE "+idToRemove);
+        this.brushSpaces = this.brushSpaces.filter(function(bs) {
+            return bs.id !== idToRemove;
+        });
+        this.resize(this.width, this.height);
     }
     add_brush_space(newBrushSpaceJSONDescription) {
         newBrushSpaceJSONDescription = $.extend({
@@ -221,6 +231,7 @@ class BrushSpaceGroup {
         copyJSON.id = guid();
         copyJSON.brush_spaces = copyJSON.brush_spaces.map(function(bs) {
             bs.group_id = copyJSON.id;
+            bs.id = guid();
             return bs;
         });
         return copyJSON;

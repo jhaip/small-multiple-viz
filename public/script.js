@@ -2,7 +2,8 @@ var dispatch = d3.dispatch("brushchange",
                            "hoverchange",
                            "statechange",
                            "savedata--Annotation",
-                           "delete-brush-space-group");
+                           "delete-brush-space-group",
+                           "delete-brush-space");
 var update_count = 0;
 var myScreen;
 var state = "";
@@ -58,7 +59,8 @@ $("#saveScreenDescription").click(function() {
 });
 
 $("#btn-add-group").click(function() {
-    createBrushSpaces(dmMaster);
+    myScreen.add_brush_space_group();
+    saveScreenDescription();
 });
 
 $("#endTestModal_endTestButton").click(function() {
@@ -90,12 +92,6 @@ $("#submitAddVisual").click(function() {
 
     $('#newVisualModal').modal('hide');
 });
-
-function createBrushSpaces(dmMaster) {
-    console.log("create brush spaces");
-    var newTargetGroup = myScreen.add_brush_space_group();
-    saveScreenDescription();
-}
 
 function saveScreenDescription() {
     var screenDescription = myScreen.toJSON();
