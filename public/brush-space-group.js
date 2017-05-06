@@ -72,13 +72,6 @@ class BrushSpaceGroup {
             that.brush_change(e);
         });
         this.update_domain(this.domain, true);
-
-        this.testNotes = description["notes"] || "";
-        this.el.selectAll(".testNotes--"+this.id)
-            .data([this.testNotes])
-            .enter().append("div")
-            .attr("class", "testNotes testNotes--"+this.id)
-            .text(function(d) { return "Notes: "+d; });
     }
     push_to_updating_stack() {
         this.updatingBrushStack.push("true");
@@ -103,7 +96,8 @@ class BrushSpaceGroup {
             group_id: this.id,
             width: this.width,
             x_domain: this.get_date_domain(),
-            parent: this.el // TODO this seems wrong because the toJSON doesn't include it
+            parent: this.el, // TODO this seems wrong because the toJSON doesn't include it
+            is_context: false
         }, newBrushSpaceJSONDescription);
         var newBrushSpace;
         if (newBrushSpaceJSONDescription["visual_type"] === "Vega") {
@@ -122,12 +116,17 @@ class BrushSpaceGroup {
             newBrushSpace = new BrushSpaceLivestream(dispatch,
                                                      dmMaster,
                                                      newBrushSpaceJSONDescription);
+        } else if (newBrushSpaceJSONDescription["visual_type"] === "Notes") {
+            newBrushSpace = new BrushSpaceNotes(dispatch,
+                                                dmMaster,
+                                                newBrushSpaceJSONDescription);
         } else if (newBrushSpaceJSONDescription["visual_type"] === "Base") {
             newBrushSpace = new BrushSpace(dispatch,
                                            dmMaster,
                                            newBrushSpaceJSONDescription);
         }
         this.brushSpaces.push(newBrushSpace);
+        return newBrushSpace;
     }
     get_date_from_str(str) {
         var m = moment(str);
@@ -192,12 +191,7 @@ class BrushSpaceGroup {
         if (this.domain[1] === "now") {
             this.testNotes = testNotes;
 
-            var testNotesDisplay = this.el.selectAll(".testNotes--"+this.id)
-                .data([this.testNotes]);
-            testNotesDisplay.enter().append("div")
-                .attr("class", "testNotes testNotes--"+this.id)
-                .merge(testNotesDisplay)
-                    .text(function(d) { return "Notes: "+d; });
+            // TODO save notes
 
             this.domain[1] = this.get_date_domain()[1];
             this.update_domain(this.domain);
@@ -222,8 +216,7 @@ class BrushSpaceGroup {
             height: this.height,
             brush_spaces: this.brushSpaces.map(function(bs) {
                 return bs.toJSON();
-            }),
-            notes: this.testNotes
+            })
         };
     }
     toJSONCopy() {

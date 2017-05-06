@@ -129,6 +129,19 @@
             #remote-media video {
                 height: 100%;
             }
+
+            .notes-container {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+            .notes-container .notes-button-container {
+                flex: 0 1 auto;
+            }
+            .notes-textarea {
+                flex: 1 1 auto;
+                overflow-y: scroll;
+            }
         </style>
     </head>
 <body>
@@ -183,6 +196,7 @@
                 <option>GithubCommits</option>
                 <option>Annotation</option>
                 <option>VideoFeed</option>
+                <option>TestNotes</option>
               </select>
           </div>
           <div class="form-group">
@@ -193,6 +207,7 @@
                 <option>Textual Log</option>
                 <option>VideoFeed</option>
                 <option>Livestream</option>
+                <option>Notes</option>
               </select>
           </div>
           <div>
@@ -229,6 +244,7 @@
                 <option>GithubCommits</option>
                 <option>Annotation</option>
                 <option>VideoFeed</option>
+                <option>TestNotes</option>
               </select>
           </div>
           <div class="form-group">
@@ -239,6 +255,7 @@
                 <option>Textual Log</option>
                 <option>VideoFeed</option>
                 <option>Livestream</option>
+                <option>Notes</option>
               </select>
           </div>
           <div>
@@ -300,6 +317,7 @@
     <script src="data-module-datastore-annotations.js"></script>
     <script src="data-module-github.js"></script>
     <script src="data-module-video.js"></script>
+    <script src="data-module-test-notes.js"></script>
     <script src="data-module-master.js"></script>
     <script src="vega-spec--area.js"></script>
     <script src="vega-spec--noydots.js"></script>
@@ -309,6 +327,7 @@
     <script src="brush-space-textual-log.js"></script>
     <script src="brush-space-video-feed.js"></script>
     <script src="brush-space-livestream.js"></script>
+    <script src="brush-space-notes.js"></script>
     <script src="brush-space-group.js"></script>
     <script src="script.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.7.2/firebase.js"></script>

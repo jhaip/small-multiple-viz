@@ -441,7 +441,7 @@ class BrushSpace {
         var that = this;
         if (this.source) {
             var ignorecache = (that.source === "ParticleEvent") ? true : false;  // HACK TODO remove
-            this.dataModuleMaster.fetch_data(this.source, this.x.domain(), ignorecache).done(function(data) {
+            this.dataModuleMaster.fetch_data(this.source, this.x.domain(), ignorecache, that.toJSON()).done(function(data) {
                 that.data = data;
                 that.update_scene();
             }).fail(function(e) {

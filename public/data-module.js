@@ -58,4 +58,7 @@ class DataModule {
 
         return defer.resolve(dataInDomain);
     }
+    save_data(e) {
+        return $.Deferred().resolve("");
+    }
 }
