@@ -58,10 +58,58 @@ $("#saveScreenDescription").click(function() {
     saveScreenDescription();
 });
 
-$("#btn-add-group").click(function() {
+$("#btn-new-group").click(function() {
     myScreen.add_brush_space_group();
     saveScreenDescription();
 });
+
+$("#btn-add-group").click(function() {
+    d3.select(".brush-space-group-list").html("");
+    fetchBrushSpaceGroupList();
+});
+
+function add_existing_brush_space_group_to_current_scene(description) {
+    console.log(description);
+    myScreen.add_brush_space_group(description);
+    saveScreenDescription();
+}
+
+function add_brush_space_group_to_list(collection_item) {
+    var sourcesHTML = "";
+    for (var j in collection_item.brush_spaces) {
+        var bs = collection_item.brush_spaces[j];
+        sourcesHTML += `<li><strong>${bs.source}</strong>: ${bs.visual_type}</li>`;
+    }
+    if (sourcesHTML === "") {
+        sourcesHTML = "<li>No Visuals</li>";
+    }
+    dmMaster.fetch_data("TestNotes", [], false, {group_id: collection_item.id}).done(function(notes) {
+        d3.select(".brush-space-group-list").append("div")
+            .attr("class", "brush-space-group-list--item brush-space-group-list--item--"+collection_item.id)
+            .html(`<p>${collection_item.x_domain[0]} - ${collection_item.x_domain[1]}</p>
+                   <h3>Test</h4>
+                   <small>${collection_item.id}</small>
+                   <h4>Visuals:</h4>
+                   <ol>${sourcesHTML}</ol>
+                   <h4>Notes:</h4>
+                   <p>${notes}</p>`);
+        $(".brush-space-group-list--item--"+collection_item.id).click({collection_item: collection_item}, function(e) {
+            add_existing_brush_space_group_to_current_scene(e.data.collection_item);
+            $('#findGroupModal').modal('hide');
+        });
+    }).fail(function(e) {
+        console.log("Error fetching data from "+this.id+" for source "+this.source);
+    });
+}
+
+function fetchBrushSpaceGroupList() {
+    return firebase.database().ref('/brush_space_groups').once('value').then(function(snapshot) {
+        var collection = snapshot.val();
+        for (var i in collection) {
+            add_brush_space_group_to_list(collection[i]);
+        }
+    });
+}
 
 $("#endTestModal_endTestButton").click(function() {
     var testNotes = $("#endTestModal_testNotes").val();
