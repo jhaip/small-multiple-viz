@@ -1,3 +1,11 @@
+var dispatch = d3.dispatch("brushchange",
+                           "hoverchange",
+                           "statechange",
+                           "savedata--Annotation",
+                           "delete-brush-space-group",
+                           "delete-brush-space");
+var dmMaster = undefined;
+
 function fetchScreensList() {
     return firebase.database().ref('/screens-list').once('value').then(function(snapshot) {
         var screensList = snapshot.val();
@@ -18,14 +26,34 @@ function fetchBrushSpaceGroupList() {
         var collection = snapshot.val();
         for (var i in collection) {
             var notes = collection[i].notes || "";
-            d3.select(".brush-space-group-list").append("div")
-                .attr("class", "brush-space-group-list--item")
-                .html(`<p>${collection[i].id}</p><p style="color: blue">${notes}</p>`);
+            console.log(collection[i]);
+            var sourcesHTML = "";
+            for (var j in collection[i].brush_spaces) {
+                var bs = collection[i].brush_spaces[j];
+                sourcesHTML += `<li><strong>${bs.source}</strong>: ${bs.visual_type}</li>`;
+            }
+            if (sourcesHTML === "") {
+                sourcesHTML = "<li>No Visuals</li>";
+            }
+            dmMaster.fetch_data("TestNotes", [], false, {group_id: collection[i].id}).done(function(notes) {
+                d3.select(".brush-space-group-list").append("div")
+                    .attr("class", "brush-space-group-list--item")
+                    .html(`<p>${collection[i].x_domain[0]} - ${collection[i].x_domain[1]}</p>
+                           <h3>Test</h4>
+                           <small>${collection[i].id}</small>
+                           <h4>Visuals:</h4>
+                           <ol>${sourcesHTML}</ol>
+                           <h4>Notes:</h4>
+                           <p>${notes}</p>`);
+            }).fail(function(e) {
+                console.log("Error fetching data from "+this.id+" for source "+this.source);
+            });
         }
     });
 }
 
 function init() {
+    dmMaster = new DataModuleMaster(dispatch);
     fetchScreensList();
     fetchBrushSpaceGroupList();
 }

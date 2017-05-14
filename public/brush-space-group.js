@@ -95,6 +95,7 @@ class BrushSpaceGroup {
             id: guid(),
             group_id: this.id,
             width: this.width,
+            height: 200,
             x_domain: this.get_date_domain(),
             parent: this.el, // TODO this seems wrong because the toJSON doesn't include it
             is_context: false
@@ -187,11 +188,25 @@ class BrushSpaceGroup {
 
         this.pop_off_updating_stack();
     }
-    end(testNotes) {
+    end(testNotesStr) {
+        var that = this;
         if (this.domain[1] === "now") {
-            this.testNotes = testNotes;
+            this.testNotes = testNotesStr;
 
-            // TODO save notes
+            // save notes
+            dmMaster.save_data("TestNotes", testNotesStr, {"group_id": this.id}).done(function() {
+                // make sure notes are shown if they aren't already
+                var noteBrushSpaces = that.brushSpaces.filter(function(bs) { return bs.source === "TestNotes"; });
+                if (noteBrushSpaces.length === 0) {
+                    that.add_brush_space({"source": "TestNotes", "visual_type": "Notes", "height": 200});
+                } else {
+                    noteBrushSpaces.forEach(function(nbs) {
+                        nbs.fetch_data();
+                    });
+                }
+            }).fail(function(e) {
+                console.error(e);
+            });
 
             this.domain[1] = this.get_date_domain()[1];
             this.update_domain(this.domain);

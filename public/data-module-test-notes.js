@@ -1,6 +1,5 @@
 class DataModuleTestNotes {
     constructor(dispatch, source) {
-        console.log(this);
         this.dispatch = dispatch;
         this.data = {};
         this.source = source;
@@ -35,9 +34,8 @@ class DataModuleTestNotes {
         var defer = $.Deferred();
         var updates = {};
         updates['/notes/'+e.requestingBrushSpaceData.group_id] = e.data;
-        console.log(updates);
+        this.data[e.requestingBrushSpaceData.group_id] = e.data;  // update cache
         firebase.database().ref().update(updates).then(function(e) {
-            console.log("dONE!");
             return defer.resolve();
         });
 

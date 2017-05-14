@@ -15,10 +15,8 @@ class BrushSpaceNotes extends BrushSpace {
                 .attr("class", "btn btn-default").text("Save")
                 .on("click", function(e) {
                     that.vis_el.select(".notes-textarea").property("disabled", true);
-                    console.log("saving");
                     var newData = that.vis_el.select(".notes-textarea").property("value");
                     that.dataModuleMaster.save_data(that.source, newData, that.toJSON()).done(function() {
-                        console.log("heard done");
                         that.data = newData;
                         that.vis_el.select(".notes-textarea").property("disabled", false);
                     }).fail(function(e) {
@@ -26,7 +24,8 @@ class BrushSpaceNotes extends BrushSpace {
                     });
                 });
         }
-        this.vis_el.select(".notes-textarea").property("value", this.data)
+
+        this.vis_el.select(".notes-textarea").property("value", this.data);
     }
     create_scene() {
         var that = this;
